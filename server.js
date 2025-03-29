@@ -1,44 +1,38 @@
-require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
+const cors = require("cors");
+require("dotenv").config();
+
+const professorRoutes = require("./routes/professor");
+const teamRoutes = require("./routes/team");
+const projectRoutes = require("./routes/project"); // Import project routes
+const publicationRoutes = require("./routes/publication");
+const newsRoutes = require("./routes/news");
+const galleryRoutes = require("./routes/gallery");
+const authRoutes = require("./routes/auth");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
-// Middleware to parse JSON request bodies
-app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI;
-
+const uri = process.env.MONGODB_URI;
 mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Could not connect to MongoDB", err));
+  .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("MongoDB database connection established successfully"))
+  .catch((err) => console.log(err));
 
-// Import Routes
-const professorRoutes = require("./routes/professor");
-const taskRoutes = require("./routes/tasks");
-const teamRoutes = require("./routes/team");
-const projectRoutes = require("./routes/projects");
-const publicationRoutes = require("./routes/publications");
-const newsRoutes = require("./routes/news");
-const galleryRoutes = require("./routes/gallery"); // Import the new gallery routes
-
-// Use Routes as Middleware
+// API Routes
 app.use("/api/professor", professorRoutes);
-app.use("/api/tasks", taskRoutes);
 app.use("/api/team", teamRoutes);
-app.use("/api/projects", projectRoutes);
+app.use("/api/projects", projectRoutes); // Use project routes
 app.use("/api/publications", publicationRoutes);
 app.use("/api/news", newsRoutes);
-app.use("/api/gallery", galleryRoutes); // Use the new gallery routes
+app.use("/api/gallery", galleryRoutes);
+app.use("/api/auth", authRoutes);
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running on port: ${port}`);
 });

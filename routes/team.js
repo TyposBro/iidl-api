@@ -3,6 +3,8 @@ const router = express.Router();
 const TeamMember = require("../models/team");
 const authenticateAdmin = require("../middleware/auth");
 
+// --- API Endpoints for Team Members ---
+
 // GET All Team Members (Public)
 router.get("/", async (req, res) => {
   try {
@@ -26,6 +28,19 @@ router.post("/", authenticateAdmin, async (req, res) => {
     res.status(201).json(newTeamMember);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+// GET Team Member by ID (Public - Optional, if needed)
+router.get("/:id", async (req, res) => {
+  try {
+    const teamMember = await TeamMember.findById(req.params.id);
+    if (!teamMember) {
+      return res.status(404).json({ message: "Cannot find team member" });
+    }
+    res.json(teamMember);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
