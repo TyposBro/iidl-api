@@ -8,7 +8,7 @@ const authenticateAdmin = require("../middleware/auth");
 // GET All Gallery Events (Public)
 router.get("/", async (req, res) => {
   try {
-    const galleryEvents = await GalleryEvent.find().sort({ year: "desc" });
+    const galleryEvents = await GalleryEvent.find().sort({ date: "desc" }); // Sort by date
     res.json(galleryEvents);
   } catch (err) {
     res.status(500).json({ message: err.message });

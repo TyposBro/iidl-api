@@ -2,20 +2,28 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+const multer = require("multer"); // Import multer
 
 const professorRoutes = require("./routes/professor");
 const teamRoutes = require("./routes/team");
-const projectRoutes = require("./routes/project"); // Import project routes
+const projectRoutes = require("./routes/project");
 const publicationRoutes = require("./routes/publication");
 const newsRoutes = require("./routes/news");
 const galleryRoutes = require("./routes/gallery");
 const authRoutes = require("./routes/auth");
+
+const supabase = require("./supabaseClient"); // Import Supabase client
+const uploadToSupabase = require("./utils/uploadHelper"); // Import upload helper
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Multer setup for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // MongoDB Connection
 const uri = process.env.MONGODB_URI;
@@ -24,10 +32,22 @@ mongoose
   .then(() => console.log("MongoDB database connection established successfully"))
   .catch((err) => console.log(err));
 
+// --- Image Upload Route ---
+app.post("/api/upload", upload.array("images", 10), async (req, res) => {
+  try {
+    const bucketName = process.env.SUPABASE_BUCKET_NAME;
+    const imageUrls = await uploadToSupabase(supabase, req.files, bucketName);
+    res.json(imageUrls);
+  } catch (error) {
+    console.error("Error in /api/upload:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // API Routes
 app.use("/api/professor", professorRoutes);
 app.use("/api/team", teamRoutes);
-app.use("/api/projects", projectRoutes); // Use project routes
+app.use("/api/projects", projectRoutes);
 app.use("/api/publications", publicationRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/gallery", galleryRoutes);
