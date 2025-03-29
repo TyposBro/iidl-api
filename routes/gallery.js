@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
 router.post("/", authenticateAdmin, async (req, res) => {
   const galleryEvent = new GalleryEvent({
     title: req.body.title,
-    year: req.body.year,
+    date: req.body.date,
     location: req.body.location,
     images: req.body.images,
     type: req.body.type,
@@ -41,7 +41,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
       return res.status(404).json({ message: "Cannot find gallery event" });
     }
     if (req.body.title) galleryEvent.title = req.body.title;
-    if (req.body.year) galleryEvent.year = req.body.year;
+    if (req.body.date) galleryEvent.date = req.body.date;
     if (req.body.location) galleryEvent.location = req.body.location;
     if (req.body.images) galleryEvent.images = req.body.images;
     if (req.body.type) galleryEvent.type = req.body.type;

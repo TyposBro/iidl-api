@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 
 const gallerySchema = new mongoose.Schema({
-  title: String,
-  year: Number,
+  title: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
   location: String,
   images: [String],
   type: String,

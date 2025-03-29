@@ -14,7 +14,7 @@ const authenticateAdmin = (req, res, next) => {
     if (err) {
       return res.status(401).json({ message: "Invalid token" });
     }
-    req.adminId = decoded.adminId; // Optionally attach admin ID to the request
+    req.adminId = decoded.adminId;
     next();
   });
 };

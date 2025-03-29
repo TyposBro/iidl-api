@@ -29,7 +29,8 @@ adminSchema.pre("save", async function (next) {
 // Method to compare passwords
 adminSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    const res = await bcrypt.compare(candidatePassword, this.password);
+    return res;
   } catch (error) {
     throw new Error(error);
   }

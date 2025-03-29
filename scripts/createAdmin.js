@@ -9,10 +9,7 @@ const password = process.env.ADMIN_PASSWORD;
 
 async function createAdminUser() {
   try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
     console.log("Connected to MongoDB");
 
     const existingAdmin = await Admin.findOne({ username });
@@ -22,16 +19,14 @@ async function createAdminUser() {
       return;
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const newAdmin = new Admin({
       username,
-      password: hashedPassword,
+      password: password,
     });
 
     await newAdmin.save();
     console.log(`Admin user "${username}" created successfully.`);
+    console.log(`Admin password "${password}" created successfully.`);
 
     mongoose.connection.close();
   } catch (error) {

@@ -20,7 +20,7 @@ app.use(express.json());
 // MongoDB Connection
 const uri = process.env.MONGODB_URI;
 mongoose
-  .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(uri)
   .then(() => console.log("MongoDB database connection established successfully"))
   .catch((err) => console.log(err));
 
