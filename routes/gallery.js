@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const GalleryEvent = require("../models/gallery");
 const authenticateAdmin = require("../middleware/auth");
+const supabase = require("../supabaseClient"); // Import Supabase client
 
 // --- API Endpoints for Gallery ---
 
@@ -33,6 +34,19 @@ router.post("/", authenticateAdmin, async (req, res) => {
   }
 });
 
+// Function to extract filename from URL
+const extractFilenameFromUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    const pathname = parsedUrl.pathname;
+    const parts = pathname.split("/");
+    return parts[parts.length - 1];
+  } catch (error) {
+    console.error("Error parsing URL:", error);
+    return null;
+  }
+};
+
 // PUT Update Gallery Event by ID (Admin Only)
 router.put("/:id", authenticateAdmin, async (req, res) => {
   try {
@@ -40,10 +54,32 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     if (!galleryEvent) {
       return res.status(404).json({ message: "Cannot find gallery event" });
     }
+
+    const oldImages = galleryEvent.images || [];
+    const newImages = req.body.images || [];
+    const bucketName = process.env.SUPABASE_BUCKET_NAME;
+
+    // Identify images to delete
+    const imagesToDelete = oldImages.filter((oldImage) => !newImages.includes(oldImage));
+
+    // Delete old images from Supabase
+    for (const imageUrl of imagesToDelete) {
+      const filename = extractFilenameFromUrl(imageUrl);
+      if (filename) {
+        const { error } = await supabase.storage.from(bucketName).remove([filename]);
+        if (error) {
+          console.error("Error deleting image from Supabase:", error);
+          // Optionally, you might want to handle this error more specifically
+        } else {
+          console.log(`Deleted image: ${filename}`);
+        }
+      }
+    }
+
     if (req.body.title) galleryEvent.title = req.body.title;
     if (req.body.date) galleryEvent.date = req.body.date;
     if (req.body.location) galleryEvent.location = req.body.location;
-    if (req.body.images) galleryEvent.images = req.body.images;
+    galleryEvent.images = newImages; // Update with the new array of images
     if (req.body.type) galleryEvent.type = req.body.type;
 
     const updatedGalleryEvent = await galleryEvent.save();
@@ -60,7 +96,25 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     if (!galleryEvent) {
       return res.status(404).json({ message: "Cannot find gallery event" });
     }
-    await galleryEvent.remove();
+
+    const imagesToDelete = galleryEvent.images || [];
+    const bucketName = process.env.SUPABASE_BUCKET_NAME;
+
+    // Delete associated images from Supabase
+    for (const imageUrl of imagesToDelete) {
+      const filename = extractFilenameFromUrl(imageUrl);
+      if (filename) {
+        const { error } = await supabase.storage.from(bucketName).remove([filename]);
+        if (error) {
+          console.error("Error deleting image from Supabase:", error);
+          // Optionally, you might want to handle this error more specifically
+        } else {
+          console.log(`Deleted image: ${filename}`);
+        }
+      }
+    }
+
+    await galleryEvent.deleteOne();
     res.json({ message: "Deleted gallery event" });
   } catch (err) {
     res.status(500).json({ message: err.message });

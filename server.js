@@ -2,7 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
-const multer = require("multer"); // Import multer
+const multer = require("multer");
+const crypto = require("crypto");
 
 const professorRoutes = require("./routes/professor");
 const teamRoutes = require("./routes/team");
@@ -13,7 +14,7 @@ const galleryRoutes = require("./routes/gallery");
 const authRoutes = require("./routes/auth");
 
 const supabase = require("./supabaseClient"); // Import Supabase client
-const uploadToSupabase = require("./utils/uploadHelper"); // Import upload helper
+const handleImageUpload = require("./utils/uploadHandler");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -32,16 +33,8 @@ mongoose
   .then(() => console.log("MongoDB database connection established successfully"))
   .catch((err) => console.log(err));
 
-// --- Image Upload Route ---
 app.post("/api/upload", upload.array("images", 10), async (req, res) => {
-  try {
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
-    const imageUrls = await uploadToSupabase(supabase, req.files, bucketName);
-    res.json(imageUrls);
-  } catch (error) {
-    console.error("Error in /api/upload:", error);
-    res.status(500).json({ message: error.message });
-  }
+  await handleImageUpload(req, res, supabase);
 });
 
 // API Routes
