@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "name": "iidl-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "typosbro",
+  "license": "ISC",
+  "description": "",
+  "git": "//github.com/typosbro/iidl-api",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
