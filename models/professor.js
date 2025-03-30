@@ -1,25 +1,31 @@
 const mongoose = require("mongoose");
 
-const backgroundItemSchema = new mongoose.Schema({
-  period: String,
-  desc: String,
-});
-
-const backgroundSchema = new mongoose.Schema({
-  type: String,
-  items: [backgroundItemSchema],
-});
-
 const professorSchema = new mongoose.Schema({
-  img: String,
-  name: String,
+  name: { type: String, required: true },
   role: String,
+  img: String,
   desc: String,
-  stats: [{ key: String, value: Number }],
+  cvLink: String,
+  email: String,
+  phone: String,
+  stats: [
+    {
+      key: String,
+      value: Number,
+    },
+  ],
   interests: String,
-  background: [backgroundSchema],
+  background: [
+    {
+      type: { type: String, required: true },
+      items: [
+        {
+          period: String,
+          desc: String,
+        },
+      ],
+    },
+  ],
 });
 
-const Professor = mongoose.model("Professor", professorSchema);
-
-module.exports = Professor;
+module.exports = mongoose.model("Professor", professorSchema);
