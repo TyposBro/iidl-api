@@ -13,6 +13,15 @@ const teamSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  type: {
+    type: String,
+    required: true,
+    enum: ["current", "alumni"],
+  },
+  bio: {
+    // Added bio field
+    type: String,
+  },
 });
 
 const TeamMember = mongoose.model("TeamMember", teamSchema);

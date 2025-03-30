@@ -2,6 +2,20 @@ const express = require("express");
 const router = express.Router();
 const TeamMember = require("../models/team");
 const authenticateAdmin = require("../middleware/auth");
+const supabase = require("../supabaseClient");
+
+// Function to extract filename from URL (same as in gallery routes)
+const extractFilenameFromUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    const pathname = parsedUrl.pathname;
+    const parts = pathname.split("/");
+    return parts[parts.length - 1];
+  } catch (error) {
+    console.error("Error parsing URL:", error);
+    return null;
+  }
+};
 
 // --- API Endpoints for Team Members ---
 
@@ -17,13 +31,15 @@ router.get("/", async (req, res) => {
 
 // POST Create New Team Member (Admin Only)
 router.post("/", authenticateAdmin, async (req, res) => {
-  const teamMember = new TeamMember({
-    name: req.body.name,
-    role: req.body.role,
-    img: req.body.img,
-  });
-
   try {
+    const teamMember = new TeamMember({
+      name: req.body.name,
+      role: req.body.role,
+      img: req.body.img, // Expecting image URL in the body
+      type: req.body.type,
+      bio: req.body.bio,
+    });
+
     const newTeamMember = await teamMember.save();
     res.status(201).json(newTeamMember);
   } catch (err) {
@@ -51,9 +67,28 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     if (!teamMember) {
       return res.status(404).json({ message: "Cannot find team member" });
     }
+
     if (req.body.name) teamMember.name = req.body.name;
     if (req.body.role) teamMember.role = req.body.role;
-    if (req.body.img) teamMember.img = req.body.img;
+    if (req.body.type) teamMember.type = req.body.type;
+    if (req.body.bio) teamMember.bio = req.body.bio;
+
+    // Handle image update
+    if (req.body.img && req.body.img !== teamMember.img) {
+      // Delete the old image from Supabase if the URL has changed and is not empty
+      if (teamMember.img) {
+        const filename = extractFilenameFromUrl(teamMember.img);
+        if (filename) {
+          const { error } = await supabase.storage
+            .from(process.env.SUPABASE_BUCKET_NAME)
+            .remove([filename]);
+          if (error) {
+            console.error("Error deleting old image:", error);
+          }
+        }
+      }
+      teamMember.img = req.body.img;
+    }
 
     const updatedTeamMember = await teamMember.save();
     res.json(updatedTeamMember);
@@ -69,7 +104,21 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     if (!teamMember) {
       return res.status(404).json({ message: "Cannot find team member" });
     }
-    await teamMember.remove();
+
+    // Delete the associated image from Supabase
+    if (teamMember.img) {
+      const filename = extractFilenameFromUrl(teamMember.img);
+      if (filename) {
+        const { error } = await supabase.storage
+          .from(process.env.SUPABASE_BUCKET_NAME)
+          .remove([filename]);
+        if (error) {
+          console.error("Error deleting team member image:", error);
+        }
+      }
+    }
+
+    await teamMember.deleteOne();
     res.json({ message: "Deleted team member" });
   } catch (err) {
     res.status(500).json({ message: err.message });
