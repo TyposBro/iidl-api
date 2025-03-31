@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const newsSchema = new mongoose.Schema({
-  title: String,
-  text: String,
-  date: String,
+  title: { type: String, required: true },
+  date: { type: String, required: true },
   images: [String],
-  type: String,
+  content: { type: String, required: true },
+  type: { type: String, required: true },
 });
 
 const News = mongoose.model("News", newsSchema);

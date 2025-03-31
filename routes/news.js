@@ -20,8 +20,9 @@ router.post("/", authenticateAdmin, async (req, res) => {
   const newsItem = new NewsItem({
     title: req.body.title,
     content: req.body.content,
-    image: req.body.image,
-    createdAt: req.body.createdAt || Date.now(),
+    images: req.body.images,
+    date: req.body.date || Date.now(),
+    type: req.body.type,
   });
 
   try {
@@ -41,8 +42,9 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     }
     if (req.body.title) newsItem.title = req.body.title;
     if (req.body.content) newsItem.content = req.body.content;
-    if (req.body.image) newsItem.image = req.body.image;
-    if (req.body.createdAt) newsItem.createdAt = req.body.createdAt;
+    if (req.body.images) newsItem.images = req.body.images;
+    if (req.body.type) newsItem.type = req.body.type;
+    if (req.body.date) newsItem.date = req.body.date;
 
     const updatedNewsItem = await newsItem.save();
     res.json(updatedNewsItem);
@@ -58,7 +60,7 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     if (!newsItem) {
       return res.status(404).json({ message: "Cannot find news item" });
     }
-    await newsItem.remove();
+    await newsItem.deleteOne();
     res.json({ message: "Deleted news item" });
   } catch (err) {
     res.status(500).json({ message: err.message });
