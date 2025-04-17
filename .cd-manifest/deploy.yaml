@@ -1,19 +1,94 @@
-containers:
-  - name: iidl-api-container
-    image: unist-iidl-api:local # LOCAL TAG, NO REGISTRY
-    imagePullPolicy: IfNotPresent # Or Never
-    ports:
-      - containerPort: 3000
-    env:
-      - name: MONGO_USER
-        valueFrom:
-          secretKeyRef:
-            name: mongo-secret # Matches the local secret name
-            key: MONGO_ROOT_USERNAME
-      - name: MONGO_PASS
-        valueFrom:
-          secretKeyRef:
-            name: mongo-secret # Matches the local secret name
-            key: MONGO_ROOT_PASSWORD
-      - name: MONGO_URI
-        value: "mongodb://$(MONGO_USER):$(MONGO_PASS)@mongo-service:27017/yourLocalDbName?authSource=admin"
+# File: .cd-manifest/deploy.yaml
+# --- Configuration for the Node.js API Deployment ---
+# NOTE: This version is configured for LOCAL TESTING.
+# Before committing to Git for production, you MUST:
+# 1. Change 'image:' to the full registry path and production version tag.
+# 2. Change 'imagePullPolicy:' to 'Always' or remove it.
+# 3. Ensure 'secretKeyRef.name' and 'secretKeyRef.key' point to the PRODUCTION secret name and keys.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iidl-api-deploy # Name of this Deployment object
+  namespace: main-homepage # Deploy into this namespace
+  labels:
+    app: iidl-api # Label for the Deployment itself
+spec:
+  replicas: 1 # Run 1 pod for local testing (production might be 2+)
+  selector:
+    matchLabels:
+      app: iidl-api # Selects pods with this label (must match template labels)
+  template: # Defines the Pod template
+    metadata:
+      labels:
+        app: iidl-api # Labels applied to the Pods created by this Deployment
+    spec:
+      # imagePullSecrets: # Usually only needed if pulling from a private registry - uncomment for prod
+      # - name: regcred
+      containers:
+        - name: iidl-api-container # Name of the container within the pod
+          image: unist-iidl-api:local # <-- LOCAL: Use locally built image tag
+          imagePullPolicy: IfNotPresent # <-- LOCAL: Use local image if present, don't pull always
+          ports:
+            - containerPort: 3000 # The port your Node.js application listens on INSIDE the container
+          env:
+            # Inject MongoDB Username from the Kubernetes Secret
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
+                  key: MONGO_ROOT_USERNAME # <-- LOCAL: Key within that Secret for the username
+
+            # Inject MongoDB Password from the Kubernetes Secret
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
+                  key: MONGO_ROOT_PASSWORD # <-- LOCAL: Key within that Secret for the password
+
+            # Construct the MongoDB Connection String URI
+            # Uses the injected variables and the K8s Service name for MongoDB ('mongo-service')
+            - name: MONGO_URI
+              value: "mongodb://$(MONGO_USER):$(MONGO_PASS)@mongo-service:27017/yourLocalDbName?authSource=admin"
+              #                            ^^^^^^^^^^^^^ Service name from mongo-setup.yaml
+              #                                               ^^^^^^^^^^^^^^^ CHANGE to your local DB name!
+
+            # Set Node environment (optional, but good practice)
+            - name: NODE_ENV
+              value: "production" # Or "development" for local if your app uses it
+
+            # Add any other environment variables your API needs
+            # - name: SOME_OTHER_CONFIG
+            #   value: "some_value"
+
+          # Optional: Define resource requests and limits for the container
+          # Helps Kubernetes schedule pods and prevents resource starvation/abuse
+          # Adjust these values based on observed usage
+          resources:
+            requests: # Minimum resources guaranteed
+              memory: "128Mi" # 128 Mebibytes
+              cpu: "100m" # 0.1 CPU core (100 millicores)
+            limits: # Maximum resources allowed
+              memory: "512Mi" # 512 Mebibytes
+              cpu: "500m" # 0.5 CPU core
+
+
+          # Optional but Recommended: Liveness and Readiness Probes
+          # Tells Kubernetes if your application is healthy and ready to receive traffic
+          # Uncomment and adjust paths/ports if your API has health check endpoints
+          # readinessProbe:
+          #   httpGet:
+          #     path: /api/health/ready # Example readiness endpoint
+          #     port: 3000
+          #   initialDelaySeconds: 15 # Wait 15s after container starts before probing
+          #   periodSeconds: 10      # Probe every 10s
+          #   timeoutSeconds: 2
+          #   failureThreshold: 3
+          # livenessProbe:
+          #   httpGet:
+          #     path: /api/health/live # Example liveness endpoint
+          #     port: 3000
+          #   initialDelaySeconds: 30 # Wait 30s after container starts before probing
+          #   periodSeconds: 15      # Probe every 15s
+          #   timeoutSeconds: 2
+          #   failureThreshold: 3

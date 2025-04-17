@@ -3,7 +3,7 @@
 # --- Stage 1: Build ---
 # Use a specific Node.js version as the base image. Using LTS versions is often a good idea.
 # 'alpine' variants are smaller but sometimes lack dependencies, 'slim' is a good middle ground.
-FROM node:23-slim AS builder
+FROM node:20-slim AS builder
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -29,7 +29,7 @@ COPY . .
 
 # --- Stage 2: Production ---
 # Use a minimal Node.js image for the final production stage
-FROM node:23-slim
+FROM node:20-slim
 
 # Set the working directory
 WORKDIR /usr/src/app
@@ -40,7 +40,7 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 # Copy package files (needed for npm/node to run correctly)
 COPY --from=builder /usr/src/app/package*.json ./
 # Copy application code (or compiled code if you had a build step)
-COPY --from=builder /usr/src/app .
+COPY --from=builder /usr/src/app/ .
 # If you had a build step copying compiled output (e.g., a 'dist' folder):
 # COPY --from=builder /usr/src/app/dist ./dist
 
@@ -57,4 +57,4 @@ EXPOSE 3000
 # Define the command to run your application
 # Replace 'server.js' with your actual entry point file
 # If using compiled output, it might be 'dist/server.js'
-CMD [ "node", "server.js" ]
+CMD [ "node", "src/server.js" ]
