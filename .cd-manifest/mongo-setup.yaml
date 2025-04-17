@@ -1,0 +1,93 @@
+# File: .cd-manifest/mongo-setup.yaml
+
+# --- Persistent Storage Request ---
+# This requests storage from the Kubernetes cluster for MongoDB data.
+# The actual storage (PersistentVolume) will be provided by the cluster's configuration.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc # Name of the storage claim
+  namespace: main-homepage # Must be in the same namespace as the MongoDB Deployment
+spec:
+  accessModes:
+    - ReadWriteOnce # Allows the volume to be mounted as read-write by a single node (suitable for a single DB pod)
+  resources:
+    requests:
+      storage: 5Gi # Request 5 Gigabytes of storage. Adjust size as needed.
+
+---
+# --- Networking Service ---
+# This provides a stable DNS name ('mongo-service') inside the cluster
+# for your API application to connect to the MongoDB pod(s).
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service # This is the hostname your API will use to connect
+  namespace: main-homepage
+spec:
+  selector:
+    app: mongo-db # Selects pods with the label 'app: mongo-db'
+  ports:
+    - protocol: TCP
+      port: 27017 # Port the service listens on
+      targetPort: 27017 # Port the MongoDB container listens on
+  # type: ClusterIP # Default type, only reachable within the Kubernetes cluster
+
+---
+# --- MongoDB Deployment ---
+# This tells Kubernetes how to run the MongoDB container(s).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-deployment # Name of the deployment
+  namespace: main-homepage
+spec:
+  replicas: 1 # Run a single instance of MongoDB (for high availability, more complex setups are needed)
+  selector:
+    matchLabels:
+      app: mongo-db # Must match the labels in the pod template below
+  template: # Defines the Pod(s) that will be created
+    metadata:
+      labels:
+        app: mongo-db # Label applied to the pod(s) for selection by Service and Deployment
+    spec:
+      volumes: # Define the persistent volume to use
+        - name: mongo-persistent-storage # An internal name for the volume
+          persistentVolumeClaim:
+            claimName: mongo-pvc # Reference the PersistentVolumeClaim created above
+      containers:
+        - name: mongo # Name of the container within the pod
+          image: mongo:6.0 # Use a specific version of the official MongoDB image (recommended over :latest)
+          ports:
+            - containerPort: 27017 # Expose MongoDB's default port within the container
+          env:
+            # Environment variables needed by the mongo image for initialization
+            # These values are pulled securely from a Kubernetes Secret object
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  # IMPORTANT: 'mongo-secret' is the EXPECTED name of the Secret object.
+                  # Confirm this name with your Kubernetes administrator.
+                  name: mongo-secret
+                  # IMPORTANT: 'MONGO_ROOT_USERNAME' is the EXPECTED key within the Secret.
+                  # Confirm this key name with your Kubernetes administrator.
+                  key: MONGO_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  # IMPORTANT: Use the same Secret name as above.
+                  name: mongo-secret
+                  # IMPORTANT: 'MONGO_ROOT_PASSWORD' is the EXPECTED key within the Secret.
+                  # Confirm this key name with your Kubernetes administrator.
+                  key: MONGO_ROOT_PASSWORD
+          volumeMounts: # Mount the persistent volume into the container
+            - name: mongo-persistent-storage # Must match the volume name defined above
+              mountPath: /data/db # MongoDB's default data directory inside the container
+          # Optional: Add resource requests and limits for better scheduling & stability
+          # resources:
+          #   requests:
+          #     memory: "512Mi"
+          #     cpu: "250m" # 0.25 CPU core
+          #   limits:
+          #     memory: "1Gi"
+          #     cpu: "500m" # 0.5 CPU core

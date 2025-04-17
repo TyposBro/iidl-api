@@ -1,0 +1,44 @@
+# Updated File: unist-iidl/.github/workflows/action.yml
+name: Docker Image CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out code (No changes needed)
+      - uses: actions/checkout@v3
+
+      # Step 2: Log in to registry (No changes needed - still pushing to the same registry)
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: unist.krs.ncr.gov-ntruss.com
+          username: ${{ secrets.REG_ACCESS_KEY }}
+          password: ${{ secrets.REG_SECRET_KEY }}
+
+      # Step 3: Build and push the *Node.js API* image
+      - name: Docker Build and push API Image # <-- CHANGED step name (optional, for clarity)
+        env:
+          # Use distinct variables for the API image
+          REG: unist.krs.ncr.gov-ntruss.com
+          API_NAME: unist-iidl-api # <-- CHANGED: New name for your API image
+          API_VERSION: 1.0.0 # <-- CHANGED: Starting version for your API image
+        run: |
+          # Build the API image using its specific Dockerfile and context
+          # -t $API_NAME: Tags the image locally (e.g., unist-iidl-api:latest)
+          # -f api/Dockerfile: Specifies the path to the API's Dockerfile
+          # ./api: Sets the build context to the 'api' directory
+          docker build -t $API_NAME -f api/Dockerfile ./api # <-- CHANGED command
+
+          # Tag the built API image with the full registry path and version
+          docker tag $API_NAME:latest $REG/$API_NAME:$API_VERSION # <-- CHANGED variables
+
+          # Push the API image to the private registry
+          docker push $REG/$API_NAME:$API_VERSION # <-- CHANGED variables

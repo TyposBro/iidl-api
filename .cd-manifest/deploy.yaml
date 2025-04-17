@@ -1,0 +1,19 @@
+containers:
+  - name: iidl-api-container
+    image: unist-iidl-api:local # LOCAL TAG, NO REGISTRY
+    imagePullPolicy: IfNotPresent # Or Never
+    ports:
+      - containerPort: 3000
+    env:
+      - name: MONGO_USER
+        valueFrom:
+          secretKeyRef:
+            name: mongo-secret # Matches the local secret name
+            key: MONGO_ROOT_USERNAME
+      - name: MONGO_PASS
+        valueFrom:
+          secretKeyRef:
+            name: mongo-secret # Matches the local secret name
+            key: MONGO_ROOT_PASSWORD
+      - name: MONGO_URI
+        value: "mongodb://$(MONGO_USER):$(MONGO_PASS)@mongo-service:27017/yourLocalDbName?authSource=admin"
