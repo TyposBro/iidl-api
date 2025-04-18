@@ -1,4 +1,9 @@
-// models/project.js
+// {PATH_TO_THE_PROJECT}/api/src/models/project.js
+// This file defines a Mongoose schema and model for projects.
+// It includes fields for title, subtitle, description, image, link, status, year,
+// authors, awardName, and tags.
+// It also includes timestamps for createdAt and updatedAt.
+//
 const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema(

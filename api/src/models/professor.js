@@ -1,3 +1,10 @@
+// {PATH_TO_THE_PROJECT}/api/src/models/professor.js
+// This file defines a Mongoose schema and model for professors.
+// It includes fields for name, role, image, description, CV link, email, phone,
+// statistics, interests, and background.
+// It also includes a nested schema for background items, which includes period and description.
+//
+
 const mongoose = require("mongoose");
 
 const professorSchema = new mongoose.Schema({

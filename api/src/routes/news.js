@@ -1,3 +1,11 @@
+// {PATH_TO_THE_PROJECT}/api/src/routes/news.js
+// This file defines the API routes for managing news items.
+// It includes routes for getting all news items, creating a new news item,
+// updating an existing news item, and deleting a news item.
+// It uses Express.js for routing and Mongoose for database interactions.
+// It exports the router for use in other parts of the application.
+//
+
 const express = require("express");
 const router = express.Router();
 const NewsItem = require("../models/news"); // Assuming you have a NewsItem model

@@ -1,3 +1,5 @@
+// {PATH_TO_THE_PROJECT}/api/src/models/admin.js
+// Model for the Admin user
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 

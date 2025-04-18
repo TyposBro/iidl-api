@@ -1,3 +1,10 @@
+// {PATH_TO_THE_PROJECT}/api/src/routes/professor.js
+// This file defines the routes for managing professors in the application.
+// It includes routes for getting all professors, adding a new professor,
+// updating an existing professor, and deleting a professor.
+// It uses Express.js for routing and Mongoose for database operations.
+// It exports the router for use in other parts of the application.
+//
 const express = require("express");
 const router = express.Router();
 const Professor = require("../models/professor");

@@ -1,4 +1,4 @@
-# File: .cd-manifest/deploy.yaml
+# {PATH_TO_THE_PROJECT}/.cd-manifest/deploy.yaml
 # --- Configuration for the Node.js API Deployment ---
 # NOTE: This version is configured for LOCAL TESTING.
 # Before committing to Git for production, you MUST:
@@ -34,17 +34,27 @@ spec:
           env:
             # Inject MongoDB Username from the Kubernetes Secret
             - name: MONGO_USER
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
-                  key: MONGO_ROOT_USERNAME # <-- LOCAL: Key within that Secret for the username
+              #FIXME: REMOVE THIS LINE FOR PRODUCTION
+              value: "iidl_user" # This is a placeholder. Use a Kubernetes Secret for production.
+
+              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
+              #     key: MONGO_ROOT_USERNAME # <-- LOCAL: Key within that Secret for the username
+              #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
             # Inject MongoDB Password from the Kubernetes Secret
             - name: MONGO_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
-                  key: MONGO_ROOT_PASSWORD # <-- LOCAL: Key within that Secret for the password
+              #FIXME: REMOVE THIS LINE FOR PRODUCTION
+              value: "iidl_password" # This is a placeholder. Use a Kubernetes Secret for production.
+
+              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
+              #     key: MONGO_ROOT_PASSWORD # <-- LOCAL: Key within that Secret for the password
+              #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
             # Construct the MongoDB Connection String URI
             # Uses the injected variables and the K8s Service name for MongoDB ('mongo-service')

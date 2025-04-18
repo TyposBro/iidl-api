@@ -1,3 +1,12 @@
+// {PATH_TO_THE_PROJECT}/api/src/routes/gallery.js
+// This file defines the API routes for managing gallery events.
+// It includes routes for getting all gallery events, creating a new event,
+// updating an event by ID, and deleting an event by ID.
+// It uses Express.js for routing and Mongoose for database operations.
+// It also includes authentication middleware for admin-only routes.
+// It exports the router for use in other parts of the application.
+//
+
 const express = require("express");
 const router = express.Router();
 const GalleryEvent = require("../models/gallery");

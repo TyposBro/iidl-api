@@ -1,3 +1,7 @@
+// {PATH_TO_THE_PROJECT}/api/src/models/gallery.js
+// This file defines a Mongoose schema and model for a gallery event.
+// It includes fields for title, date, location, images, and type.
+
 const mongoose = require("mongoose");
 
 const gallerySchema = new mongoose.Schema({

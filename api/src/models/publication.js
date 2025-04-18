@@ -1,4 +1,12 @@
-// models/publication.js
+// {PATH_TO_THE_PROJECT}/api/src/models/publication.js
+// This file defines a Mongoose schema and model for publications.
+// It includes fields for title, authors, venue, year, doi, link, abstract,
+// type, image, and timestamps.
+// It also includes validation for required fields and enumerations for type.
+// It uses Mongoose to create a model named "Publication" based on the schema.
+// It exports the model for use in other parts of the application.
+//
+
 const mongoose = require("mongoose");
 
 const publicationSchema = new mongoose.Schema(

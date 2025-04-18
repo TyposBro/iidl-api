@@ -1,4 +1,9 @@
-// routes/about.js
+// {PATH_TO_THE_PROJECT}/api/src/routes/about.js
+// This file defines the routes for the About page.
+// It includes routes for getting, updating, and deleting the About page content.
+// It uses Express.js for routing and Mongoose for database operations.
+// It exports the router for use in other parts of the application.
+//
 const express = require("express");
 const router = express.Router();
 const AboutPage = require("../models/about");

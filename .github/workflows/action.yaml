@@ -1,4 +1,4 @@
-# Updated File: unist-iidl/.github/workflows/action.yml
+# {PATH_TO_THE_PROJECT}/.github/workflows/action.yaml
 name: Docker Image CI
 
 on:

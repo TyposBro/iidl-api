@@ -1,4 +1,5 @@
-// models/AboutPage.js
+// {PATH_TO_THE_PROJECT}/api/src/models/about.js
+// Model for the About page
 const mongoose = require("mongoose");
 
 const aboutSchema = new mongoose.Schema({

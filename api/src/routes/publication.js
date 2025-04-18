@@ -1,4 +1,9 @@
-// routes/publications.js
+// {PATH_TO_THE_PROJECT}/api/src/routes/publication.js
+// This file contains the API routes for managing publications.
+// It includes routes for creating, reading, updating, and deleting publications.
+// It also includes middleware for authentication and authorization.
+//
+
 const express = require("express");
 const router = express.Router();
 const Publication = require("../models/publication"); // Adjust path if needed

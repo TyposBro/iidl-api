@@ -1,4 +1,22 @@
-// routes/projects.js
+// {PATH_TO_THE_PROJECT}/api/src/routes/project.js
+// This file defines the API routes for managing projects.
+// It includes routes for getting all projects, getting projects by status,
+// creating a new project, updating an existing project, and deleting a project.
+// It uses Express.js for routing and Mongoose for database operations.
+// It exports the router for use in other parts of the application.
+// It also includes a helper function to extract filenames from Supabase URLs.
+// It uses Supabase for file storage and retrieval.
+// It includes authentication middleware for admin-only routes.
+// It exports the router for use in other parts of the application.
+// It includes error handling for various operations.
+// It uses environment variables for configuration.
+// It includes validation for required fields when creating or updating projects.
+// It includes logging for important operations like file deletion.
+// It includes sorting for project retrieval based on status.
+// It includes a helper function to extract filenames from Supabase URLs.
+// It uses Mongoose for database operations.
+//
+
 const express = require("express");
 const router = express.Router();
 const Project = require("../models/project"); // Adjust path if needed

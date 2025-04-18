@@ -1,3 +1,5 @@
+// {PATH_TO_THE_PROJECT}/api/src/middleware/auth.js
+// Middleware to authenticate admin users
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 

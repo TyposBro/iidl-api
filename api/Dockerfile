@@ -1,9 +1,10 @@
-# /api/Dockerfile
+# {PATH_TO_THE_PROJECT}/api/Dockerfile
+# This Dockerfile is designed for a Node.js application with MongoDB.
 
 # --- Stage 1: Build ---
 # Use a specific Node.js version as the base image. Using LTS versions is often a good idea.
 # 'alpine' variants are smaller but sometimes lack dependencies, 'slim' is a good middle ground.
-FROM node:20-slim AS builder
+FROM node:23-slim AS builder
 
 # Set the working directory inside the container
 WORKDIR /usr/src/app
@@ -29,7 +30,7 @@ COPY . .
 
 # --- Stage 2: Production ---
 # Use a minimal Node.js image for the final production stage
-FROM node:20-slim
+FROM node:23-slim
 
 # Set the working directory
 WORKDIR /usr/src/app

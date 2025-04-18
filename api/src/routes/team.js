@@ -1,3 +1,11 @@
+// {PATH_TO_THE_PROJECT}/api/src/routes/team.js
+// This file contains the API routes for managing team members.
+// It includes routes for creating, reading, updating, and deleting team members.
+// It also includes middleware for authentication and authorization.
+// It uses Supabase for image storage and retrieval.
+// It uses Mongoose for MongoDB interactions.
+//
+
 const express = require("express");
 const router = express.Router();
 const TeamMember = require("../models/team");

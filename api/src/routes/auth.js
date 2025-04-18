@@ -1,3 +1,12 @@
+// {PATH_TO_THE_PROJECT}/api/src/routes/auth.js
+// This file defines an Express router for handling authentication-related routes.
+// It includes a login route for admin users.
+// The login route checks the provided username and password against the database.
+// If the credentials are valid, it generates a JWT token and sends it back to the client.
+// It uses bcrypt for password hashing and JWT for token generation.
+// It exports the router for use in other parts of the application.
+//
+
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");

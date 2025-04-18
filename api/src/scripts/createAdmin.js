@@ -1,3 +1,12 @@
+// {PATH_TO_THE_PROJECT}/api/src/scripts/createAdmin.js
+// This script creates an admin user in the MongoDB database.
+// It connects to the database, checks if an admin user already exists,
+// and if not, creates a new admin user with a specified username and password.
+// It uses Mongoose for database operations and bcrypt for password hashing.
+// It also uses environment variables to store sensitive information like the database URI and admin credentials.
+// It exports the createAdminUser function for use in other parts of the application.
+//
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Admin = require("../models/admin"); // Adjust path if needed

@@ -1,4 +1,4 @@
-# File: .cd-manifest/mongo-setup.yaml
+# {PATH_TO_THE_PROJECT}/.cd-manifest/mongo-setup.yaml
 
 # --- Persistent Storage Request ---
 # This requests storage from the Kubernetes cluster for MongoDB data.
@@ -64,22 +64,34 @@ spec:
             # Environment variables needed by the mongo image for initialization
             # These values are pulled securely from a Kubernetes Secret object
             - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  # IMPORTANT: 'mongo-secret' is the EXPECTED name of the Secret object.
-                  # Confirm this name with your Kubernetes administrator.
-                  name: mongo-secret
-                  # IMPORTANT: 'MONGO_ROOT_USERNAME' is the EXPECTED key within the Secret.
-                  # Confirm this key name with your Kubernetes administrator.
-                  key: MONGO_ROOT_USERNAME
+              #FIXME: REMOVE THIS LINE FOR PRODUCTION
+              value: "iidl_user" # This is a placeholder. Use a Kubernetes Secret for production.
+
+              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
+              # valueFrom:
+              #   secretKeyRef:
+              #     # IMPORTANT: 'mongo-secret' is the EXPECTED name of the Secret object.
+              #     # Confirm this name with your Kubernetes administrator.
+              #     name: mongo-secret
+              #     # IMPORTANT: 'MONGO_ROOT_USERNAME' is the EXPECTED key within the Secret.
+              #     # Confirm this key name with your Kubernetes administrator.
+              #     key: MONGO_ROOT_USERNAME
+              #! UNCOMMENT THIS SECTION FOR PRODUCTION
+
             - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  # IMPORTANT: Use the same Secret name as above.
-                  name: mongo-secret
-                  # IMPORTANT: 'MONGO_ROOT_PASSWORD' is the EXPECTED key within the Secret.
-                  # Confirm this key name with your Kubernetes administrator.
-                  key: MONGO_ROOT_PASSWORD
+              #FIXME: REMOVE THIS LINE FOR PRODUCTION
+              value: "iidl_password" # This is a placeholder. Use a Kubernetes Secret for production.
+
+              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
+              # valueFrom:
+              #   secretKeyRef:
+              #     # IMPORTANT: Use the same Secret name as above.
+              #     name: mongo-secret
+              #     # IMPORTANT: 'MONGO_ROOT_PASSWORD' is the EXPECTED key within the Secret.
+              #     # Confirm this key name with your Kubernetes administrator.
+              #     key: MONGO_ROOT_PASSWORD
+              #! UNCOMMENT THIS SECTION FOR PRODUCTION
+
           volumeMounts: # Mount the persistent volume into the container
             - name: mongo-persistent-storage # Must match the volume name defined above
               mountPath: /data/db # MongoDB's default data directory inside the container
