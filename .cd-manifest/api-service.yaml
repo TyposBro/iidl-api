@@ -11,5 +11,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80 # Port the service listens on *within* the cluster
-      targetPort: 3000 # Port your Node.js container listens on
+      targetPort: 8000 # Port your Node.js container listens on
   # type: ClusterIP # Default - only reachable inside cluster

@@ -1,0 +1,92 @@
+# {PATH_TO_THE_PROJECT}/docker-compose.yml
+
+version: '3.8' # Use a recent version
+
+services:
+  # --- Backend API Service ---
+  api:
+    build:
+      context: ./api # Path to the directory containing the API's Dockerfile
+      # dockerfile: Dockerfile # Optional: if your Dockerfile has a non-standard name
+    container_name: iidl_api_dev # Optional: specific container name
+    ports:
+      # Map host port to container port (host:container)
+      # You'll access the API via http://localhost:8080 from your browser/frontend
+      - "${API_MAPPED_PORT:-8080}:${API_PORT:-8000}"
+    environment:
+      # Use variables defined in the .env file
+      MONGO_USER: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_PASS: ${MONGO_INITDB_ROOT_PASSWORD}
+      # Use the service name 'mongo' as the hostname
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/${MONGO_DB_NAME}?authSource=admin
+      PORT: ${API_PORT:-8000} # Port the Node.js app listens on inside the container
+      NODE_ENV: ${NODE_ENV:-development}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      # Mount local code into the container for live updates
+      # Assumes API code is in './api' and WORKDIR in Dockerfile is /app
+      - ./api:/app
+      # Prevent node_modules from being overwritten by the mount (if needed)
+      - /app/node_modules
+    depends_on:
+      - mongo # Wait for the mongo service to start (doesn't guarantee readiness)
+    networks:
+      - iidl-network # Connect to the custom network
+
+  # --- Frontend React Service ---
+  frontend:
+    build:
+      context: ./frontend # Path to the directory containing the Frontend's Dockerfile
+      # dockerfile: Dockerfile # Optional: if your Dockerfile has a non-standard name
+    container_name: iidl_frontend_dev
+    ports:
+      # Map host port 3000 to container port 3000 (standard for React dev servers)
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      # Tell React Dev Server the API is available via the mapped port on the host machine from browser perspective
+      # Or configure proxy in package.json
+      REACT_APP_API_URL: http://localhost:${API_MAPPED_PORT:-8080}
+      # If frontend needs direct access internally (less common):
+      # INTERNAL_API_URL: http://api:${API_PORT:-8000}
+      NODE_ENV: ${NODE_ENV:-development}
+    volumes:
+      # Mount local code into the container for live updates
+      # Assumes Frontend code is in './frontend' and WORKDIR in Dockerfile is /app
+      - ./frontend:/app
+      # Prevent node_modules from being overwritten by the mount (if needed)
+      - /app/node_modules
+    depends_on:
+      - api # Wait for the api service to start
+    networks:
+      - iidl-network
+
+  # --- MongoDB Service ---
+  mongo:
+    image: mongo:6.0 # Use the same version as in your K8s manifest
+    container_name: iidl_mongo_dev
+    ports:
+      # Map host port to container port (optional, but useful for tools like MongoDB Compass)
+      - "${MONGO_MAPPED_PORT:-27017}:27017"
+    environment:
+      # Use variables from the .env file for initial database setup
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      # MONGO_INITDB_DATABASE: ${MONGO_DB_NAME} # Optional: specify initial DB, but URI connection often handles this
+    volumes:
+      # Use a named volume to persist MongoDB data between runs
+      - mongo-data:/data/db
+    networks:
+      - iidl-network
+
+# --- Named Volume Definition ---
+# This ensures data in MongoDB persists even if the container is removed and recreated
+volumes:
+  mongo-data:
+
+# --- Custom Network Definition ---
+# Allows containers to communicate using service names (e.g., 'api', 'mongo')
+networks:
+  iidl-network:
+    driver: bridge

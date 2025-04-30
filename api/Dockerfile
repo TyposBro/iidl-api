@@ -17,7 +17,7 @@ COPY package*.json ./
 
 # Install dependencies - use --only=production if you have separate devDependencies
 # Or install all, and prune later if needed.
-RUN npm install
+RUN npm install --legacy-peer-deps
 # If you use yarn:
 # RUN yarn install --frozen-lockfile
 
@@ -53,7 +53,7 @@ ENV NODE_ENV=production
 ENV MONGO_URI="mongodb://localhost:27017/defaultDbName"
 
 # Expose the port the application listens on (must match your Node.js app)
-EXPOSE 3000
+EXPOSE 8000
 
 # Define the command to run your application
 # Replace 'server.js' with your actual entry point file

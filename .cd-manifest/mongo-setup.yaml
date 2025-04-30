@@ -64,9 +64,7 @@ spec:
             # Environment variables needed by the mongo image for initialization
             # These values are pulled securely from a Kubernetes Secret object
             - name: MONGO_INITDB_ROOT_USERNAME
-              #FIXME: REMOVE THIS LINE FOR PRODUCTION
-              value: "iidl_user" # This is a placeholder. Use a Kubernetes Secret for production.
-
+              value: "iidl_user" #FIXME: REMOVE THIS LINE FOR PRODUCTION
               #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
               # valueFrom:
               #   secretKeyRef:
@@ -79,9 +77,7 @@ spec:
               #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
             - name: MONGO_INITDB_ROOT_PASSWORD
-              #FIXME: REMOVE THIS LINE FOR PRODUCTION
-              value: "iidl_password" # This is a placeholder. Use a Kubernetes Secret for production.
-
+              value: "iidl_password" #FIXME: REMOVE THIS LINE FOR PRODUCTION
               #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
               # valueFrom:
               #   secretKeyRef:

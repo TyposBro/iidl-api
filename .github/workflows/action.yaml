@@ -42,3 +42,34 @@ jobs:
 
           # Push the API image to the private registry
           docker push $REG/$API_NAME:$API_VERSION # <-- CHANGED variables
+
+      # Step 4: Build and push the Frontend image
+      - name: Docker Build and push Frontend Image
+        env:
+          REG: unist.krs.ncr.gov-ntruss.com
+          FRONTEND_NAME: unist-iidl-frontend # New name for frontend image
+          FRONTEND_VERSION: 1.0.0 # Starting version for frontend image (consider dynamic tagging)
+        run: |
+          echo "Building Frontend Image..."
+          # Build using the frontend Dockerfile and context
+          docker build -t $FRONTEND_NAME -f frontend/Dockerfile ./frontend # Use FRONTEND variables
+          echo "Tagging Frontend Image..."
+          # Tag using the frontend variables
+          docker tag $FRONTEND_NAME:latest $REG/$FRONTEND_NAME:$FRONTEND_VERSION # Use FRONTEND variables
+          echo "Pushing Frontend Image..."
+          # Push using the frontend variables
+          docker push $REG/$FRONTEND_NAME:$FRONTEND_VERSION # Use FRONTEND variables
+
+      # --- Optional: Add deployment step here ---
+      # If you use ArgoCD, FluxCD, or kubectl apply with commit hash etc., add those steps here.
+      # Example using kubectl (requires KUBECONFIG setup):
+      # - name: Deploy to Kubernetes
+      #   env:
+      #     KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }} # Needs KUBECONFIG secret in GitHub
+      #   run: |
+      #     echo "${KUBECONFIG_DATA}" > kubeconfig.yaml
+      #     export KUBECONFIG=kubeconfig.yaml
+      #     # Apply ALL manifests in the directory
+      #     # Ensure image tags in deploy.yaml/frontend-deploy.yaml are updated if needed (e.g., using kustomize or sed)
+      #     kubectl apply -f .cd-manifest/
+      #     rm kubeconfig.yaml # Clean up
