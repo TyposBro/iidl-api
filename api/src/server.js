@@ -19,7 +19,7 @@ const supabase = require("./supabaseClient"); // Import Supabase client
 const handleImageUpload = require("./utils/uploadHandler");
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.API_PORT || 8000;
 
 app.use(cors());
 app.use(express.json());
