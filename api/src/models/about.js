@@ -1,25 +1,57 @@
 // {PATH_TO_THE_PROJECT}/api/src/models/about.js
-// Model for the About page
 const mongoose = require("mongoose");
 
-const aboutSchema = new mongoose.Schema({
-  intro: {
-    slides: [String], // Array of image URLs for the carousel
-    heading: String,
-    description: String,
-  },
-  tracks: {
-    title: String,
-    buttons: [String], // List of research track titles
-  },
-  details: [
-    {
-      title: String,
-      description: String,
-      image: String, // Image URL for background images
+// Define the schema for items within the body.list array
+const bodyListItemSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Track title is required."],
     },
-  ],
-});
+    text: {
+      type: [String], // Array of strings (paragraphs)
+      required: [true, "Track text description is required."],
+    },
+    img: {
+      type: [String], // Array of image URLs for the track
+      // Not strictly required, can be empty
+    },
+  },
+  { _id: false }
+); // Don't generate automatic _id for subdocuments in the array
 
+// Define the main About page schema
+const aboutSchema = new mongoose.Schema(
+  {
+    head: {
+      title: {
+        type: String,
+        required: [true, "Head title is required."],
+        trim: true,
+      },
+      description: {
+        type: String,
+        required: [true, "Head description is required."],
+        trim: true,
+      },
+    },
+    body: {
+      title: {
+        type: String,
+        required: [true, "Body title is required."],
+        trim: true,
+      },
+      list: {
+        type: [bodyListItemSchema], // Array of items following the sub-schema
+        default: [], // Default to an empty list
+      },
+    },
+  },
+  {
+    timestamps: true, // Automatically add createdAt and updatedAt timestamps
+  }
+);
+
+// Create and export the model
 const AboutPage = mongoose.model("AboutPage", aboutSchema);
 module.exports = AboutPage;
