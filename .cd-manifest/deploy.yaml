@@ -37,42 +37,38 @@ spec:
           env:
             # --- Using hardcoded values based on previous example ---
             # FIXME: Replace with secretKeyRef for production!
-            - name: MONGO_USER
-              value: "iidl_user"
-            - name: MONGO_PASS
-              value: "iidl_password"
             - name: ADMIN_USERNAME
               value: "123" # Assuming this matches the value in .env.local for testing
             - name: ADMIN_PASSWORD
               value: "123" # Assuming this matches the value in .env.local for testing
-            - name: MONGODB_URI # Script uses MONGODB_URI, provide it
-              value: "mongodb://$(MONGO_USER):$(MONGO_PASS)@mongo-service:27017/iidl-db?authSource=admin" # Use correct DB name
+            # Inject MongoDB Username from the Kubernetes Secret
+            - name: MONGO_USERNAME
+              value: "iidl_user" #FIXME: REMOVE THIS LINE FOR PRODUCTION
+              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
+              #     key: MONGO_ROOT_USERNAME # <-- LOCAL: Key within that Secret for the username
+              #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
-            # --- Production Example using Secrets (Comment out hardcoded values above) ---
-            # - name: MONGO_USER
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: mongo-secret # PRODUCTION secret name
-            #       key: MONGO_ROOT_USERNAME # PRODUCTION key name
-            # - name: MONGO_PASS
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: mongo-secret # PRODUCTION secret name
-            #       key: MONGO_ROOT_PASSWORD # PRODUCTION key name
-            # - name: MONGODB_URI # Script uses MONGODB_URI, provide it
-            #   value: "mongodb://$(MONGO_USER):$(MONGO_PASS)@mongo-service:27017/iidl-db?authSource=admin" # Use PRODUCTION DB name
-            # - name: ADMIN_USERNAME
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: iidl-api-secrets # PRODUCTION API secret name
-            #       key: ADMIN_USERNAME # PRODUCTION key name
-            # - name: ADMIN_PASSWORD
-            #   valueFrom:
-            #     secretKeyRef:
-            #       name: iidl-api-secrets # PRODUCTION API secret name
-            #       key: ADMIN_PASSWORD # PRODUCTION key name
-            # --- End Production Example ---
+            # Inject MongoDB Password from the Kubernetes Secret
+            - name: MONGO_PASSWORD
+              value: "iidl_password" #FIXME: REMOVE THIS LINE FOR PRODUCTION
+              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
+              #     key: MONGO_ROOT_PASSWORD # <-- LOCAL: Key within that Secret for the password
+              #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
+            - name: MONGO_DB_NAME
+              value: "iidl-db"
+            # Construct the MongoDB Connection String URI
+            # Uses the injected variables and the K8s Service name for MongoDB ('mongo-service')
+            - name: MONGODB_URI
+              value: "mongodb+srv://$(MONGO_USERNAME):$(MONGO_PASSWORD)@cluster0.zyb01.mongodb.net/$(MONGO_DB_NAME)?retryWrites=true&w=majority&appName=Cluster0"
+              #                            ^^^^^^^^^^^^^ Service name from mongo-setup.yaml
+              #                            ^^^^^^^^^^^^^ CHANGE to your local DB name!
       # --- MAIN API CONTAINER SECTION ---
 
       # imagePullSecrets: # Usually only needed if pulling from a private registry - uncomment for prod
@@ -85,7 +81,7 @@ spec:
             - containerPort: 8000 # The port your Node.js application listens on INSIDE the container
           env:
             # Inject MongoDB Username from the Kubernetes Secret
-            - name: MONGO_USER
+            - name: MONGO_USERNAME
               value: "iidl_user" #FIXME: REMOVE THIS LINE FOR PRODUCTION
               #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
               # valueFrom:
@@ -95,7 +91,7 @@ spec:
               #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
             # Inject MongoDB Password from the Kubernetes Secret
-            - name: MONGO_PASS
+            - name: MONGO_PASSWORD
               value: "iidl_password" #FIXME: REMOVE THIS LINE FOR PRODUCTION
               #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
               # valueFrom:
@@ -104,37 +100,15 @@ spec:
               #     key: MONGO_ROOT_PASSWORD # <-- LOCAL: Key within that Secret for the password
               #! UNCOMMENT THIS SECTION FOR PRODUCTION
 
+            - name: MONGO_DB_NAME
+              value: "iidl-db"
             # Construct the MongoDB Connection String URI
             # Uses the injected variables and the K8s Service name for MongoDB ('mongo-service')
-            - name: MONGO_URI
-              value: "mongodb://$(MONGO_USER):$(MONGO_PASS)@mongo-service:27017/iidl-db?authSource=admin"
+            - name: MONGODB_URI
+              value: "mongodb+srv://$(MONGO_USERNAME):$(MONGO_PASSWORD)@cluster0.zyb01.mongodb.net/$(MONGO_DB_NAME)?retryWrites=true&w=majority&appName=Cluster0"
               #                            ^^^^^^^^^^^^^ Service name from mongo-setup.yaml
-              #                                               ^^^^^^^^^^^^^^^ CHANGE to your local DB name!
+              #                            ^^^^^^^^^^^^^ CHANGE to your local DB name!
 
-            # Set Node environment (optional, but good practice)
-            - name: NODE_ENV
-              value: "production" # Or "development" for local if your app uses it
-
-            - name: PORT
-              value: "8000" # Set the port for the app to use
-
-            - name: ADMIN_USERNAME
-              value: "iidl_admin" #FIXME: REMOVE THIS LINE FOR PRODUCTION
-              #FIXME UNCOMMENT THIS SECTION FOR PRODUCTION
-              # valueFrom:
-              #   secretKeyRef:
-              #     name: iidl-api-secrets # Reference the new secret
-              #     key: ADMIN_USERNAME
-              #! UNCOMMENT THIS SECTION FOR PRODUCTION
-
-            - name: ADMIN_PASSWORD
-              value: "iidl_password" #FIXME: REMOVE THIS LINE FOR PRODUCTION
-              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
-              # valueFrom:
-              #   secretKeyRef:
-              #     name: iidl-api-secrets
-              #     key: ADMIN_PASSWORD
-              #! UNCOMMENT THIS SECTION FOR PRODUCTION
             - name: JWT_SECRET
               value: "iidl_jwt_secret" #FIXME: REMOVE THIS LINE FOR PRODUCTION
               #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
@@ -143,6 +117,13 @@ spec:
               #     name: iidl-api-secrets
               #     key: JWT_SECRET
               #! UNCOMMENT THIS SECTION FOR PRODUCTION
+
+            # Set Node environment (optional, but good practice)
+            - name: NODE_ENV
+              value: "production" # Or "development" for local if your app uses it
+
+            - name: PORT
+              value: "8000" # Set the port for the app to use
 
           # Optional: Define resource requests and limits for the container
           # Helps Kubernetes schedule pods and prevents resource starvation/abuse
