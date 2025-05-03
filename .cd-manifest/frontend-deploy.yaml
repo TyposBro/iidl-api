@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: iidl-frontend-deploy
-  namespace: main-homepage
+  namespace: ${K8S_NAMESPACE}
   labels:
     app: iidl-frontend
 spec:

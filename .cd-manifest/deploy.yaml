@@ -9,7 +9,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: iidl-api-deploy # Name of this Deployment object
-  namespace: main-homepage # Deploy into this namespace
+  namespace: ${K8S_NAMESPACE}
   labels:
     app: iidl-api # Label for the Deployment itself
 spec:
