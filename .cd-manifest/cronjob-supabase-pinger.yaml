@@ -5,7 +5,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: supabase-function-pinger
-  namespace: ${K8S_NAMESPACE}
+  namespace: main-homepage
 spec:
   # Cron schedule: Run every 25 minutes
   schedule: "*/25 * * * *"
@@ -34,7 +34,6 @@ spec:
               # Environment variable to hold the function URL for clarity
               env:
                 - name: FUNCTION_URL
-                  # !!! IMPORTANT: Replace with your ACTUAL Supabase Edge Function URL !!!
                   value: "https://vtigodxfcbkovkyelevg.supabase.co/functions/v1/db-pinger"
 
               # The command to run inside the container

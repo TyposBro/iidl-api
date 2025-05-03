@@ -1,0 +1,63 @@
+# {PATH_TO_THE_PROJECT}/.cd-manifest/cronjob-mongodb-pinger.yaml
+# --- CronJob to ping MongoDB Atlas cluster every 25 minutes ---
+# WARNING: Contains hardcoded MongoDB connection string for development purposes ONLY.
+#          Replace with Kubernetes Secrets before production deployment.
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-atlas-pinger
+  namespace: main-homepage
+spec:
+  # Cron schedule: Run every 25 minutes
+  schedule: "*/25 * * * *"
+
+  # Prevent concurrent runs
+  concurrencyPolicy: Forbid
+
+  # Keep limited history
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+  # Template for the Job
+  jobTemplate:
+    spec:
+      # Optional: Max time for the job to run
+      activeDeadlineSeconds: 180 # 3 minutes deadline
+
+      # Template for the Pod
+      template:
+        spec:
+          containers:
+            - name: mongodb-pinger-container
+              # Use the official MongoDB image which includes mongosh
+              image: mongo:latest # Consider pinning to a specific version (e.g., mongo:7.0) for stability
+
+              # Environment variable for the MongoDB Connection String
+              # FIXME: Hardcoded value for development. Replace with secretKeyRef for production!
+              env:
+                - name: MONGODB_URI
+                  # !!! REPLACE THIS ENTIRE VALUE WITH YOUR ACTUAL ATLAS CONNECTION STRING !!!
+                  value: "mongodb+srv://YOUR_USER:YOUR_PASSWORD@your-cluster-hostname.mongodb.net/YOUR_DB_NAME?retryWrites=true&w=majority"
+
+              # Command to execute inside the container
+              command: ["mongosh"] # Explicitly use mongosh
+              args:
+                # 1. Pass the connection string from the environment variable as the first argument
+                - "$(MONGODB_URI)"
+                # 2. Suppress the welcome message and startup diagnostics
+                - "--quiet"
+                # 3. Don't load any local RC files
+                - "--norc"
+                # 4. Execute a simple command string and exit
+                - "--eval"
+                # 5. The command: db.runCommand({ping: 1}) is a standard MongoDB ping.
+                #    It returns { ok: 1.0 } on success.
+                - "db.runCommand({ping: 1})"
+
+                # Alternative simple commands you could use in --eval:
+                # - "db.serverStatus().ok" # Checks server status, returns 1 if ok
+                # - "db.getMongo().getDBNames().length > 0 ? 'OK' : 'Error'" # Tries to list DBs
+
+          # Restart policy for the pod created by the Job.
+          restartPolicy: OnFailure
