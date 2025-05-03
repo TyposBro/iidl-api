@@ -9,6 +9,7 @@ const router = express.Router();
 const Publication = require("../models/publication"); // Adjust path if needed
 const authenticateAdmin = require("../middleware/auth"); // Adjust path if needed
 const supabase = require("../supabaseClient"); // Adjust path if needed
+const mongoose = require("mongoose");
 
 // Helper function to extract filename from Supabase URL (ensure this is accessible)
 const extractFilenameFromUrl = (url) => {
@@ -158,7 +159,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     // Use Object.assign or spread operator for cleaner updates
     Object.keys(updates).forEach((key) => {
       // Only update fields that exist in the schema and are part of the request
-      if (publicationSchema.path(key) && updates[key] !== undefined) {
+      if (publication.path(key) && updates[key] !== undefined) {
         // Handle potential empty strings for optional fields by setting to undefined
         if (["venue", "doi", "link", "abstract", "image"].includes(key) && updates[key] === "") {
           publication[key] = undefined;

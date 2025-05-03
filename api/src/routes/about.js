@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const AboutPage = require("../models/about");
-const verifyToken = require("../middleware/authMiddleware"); // Assuming you have this middleware
+const verifyToken = require("../middleware/auth"); // Assuming you have this middleware
 
 // GET /api/about - Get the current About page content (No changes needed)
 router.get("/", async (req, res) => {

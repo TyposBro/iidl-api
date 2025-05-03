@@ -40,7 +40,7 @@ app.post("/api/upload", upload.array("images", 10), async (req, res) => {
 });
 
 // API Routes
-app.use("/api/professors", professorRoutes);
+app.use("/api/prof", professorRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/publications", publicationRoutes);
