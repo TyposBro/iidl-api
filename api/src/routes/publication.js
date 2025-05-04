@@ -69,8 +69,9 @@ router.post("/", authenticateAdmin, async (req, res) => {
     doi,
     link,
     abstract,
-    type, // Added type
-    image, // Added image URL from upload
+    type,
+    location,
+    image,
   } = req.body;
 
   // Basic Validation
@@ -93,6 +94,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
     abstract,
     type,
     image,
+    location,
   });
 
   try {
@@ -161,7 +163,10 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
       // Only update fields that exist in the schema and are part of the request
       if (publication.path(key) && updates[key] !== undefined) {
         // Handle potential empty strings for optional fields by setting to undefined
-        if (["venue", "doi", "link", "abstract", "image"].includes(key) && updates[key] === "") {
+        if (
+          ["venue", "doi", "link", "abstract", "image", "location"].includes(key) &&
+          updates[key] === ""
+        ) {
           publication[key] = undefined;
         } else {
           publication[key] = updates[key];
