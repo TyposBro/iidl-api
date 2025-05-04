@@ -26,7 +26,9 @@ const teamSchema = new mongoose.Schema({
     enum: ["current", "alumni"],
   },
   bio: {
-    // Added bio field
+    type: String,
+  },
+  linkedin: {
     type: String,
   },
 });

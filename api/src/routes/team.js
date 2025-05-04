@@ -46,6 +46,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
       img: req.body.img, // Expecting image URL in the body
       type: req.body.type,
       bio: req.body.bio,
+      linkedin: req.body.linkedin,
     });
 
     const newTeamMember = await teamMember.save();
@@ -80,6 +81,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     if (req.body.role) teamMember.role = req.body.role;
     if (req.body.type) teamMember.type = req.body.type;
     if (req.body.bio) teamMember.bio = req.body.bio;
+    if (req.body.linkedin) teamMember.linkedin = req.body.linkedin;
 
     // Handle image update
     if (req.body.img && req.body.img !== teamMember.img) {
