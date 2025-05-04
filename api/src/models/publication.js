@@ -46,6 +46,9 @@ const publicationSchema = new mongoose.Schema(
       enum: ["journal", "conference"],
       index: true,
     },
+    location: {
+      type: String,
+    },
     image: {
       // Optional representative image URL
       type: String,
