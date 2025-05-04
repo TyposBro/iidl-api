@@ -23,10 +23,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    console.log("Stored hashed password:", admin.password);
-    const isPasswordValid = await admin.comparePassword(password);
-    console.log("Password comparison result:", isPasswordValid);
-    if (!isPasswordValid) {
+    if (password !== admin.password) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
