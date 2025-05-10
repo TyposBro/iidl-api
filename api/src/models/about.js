@@ -1,7 +1,7 @@
 // {PATH_TO_THE_PROJECT}/api/src/models/about.js
 const mongoose = require("mongoose");
 
-// Define the schema for items within the body.list array
+// Define the schema for items within the body.list array foo
 const bodyListItemSchema = new mongoose.Schema(
   {
     title: {
