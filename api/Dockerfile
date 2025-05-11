@@ -58,4 +58,5 @@ EXPOSE 8000
 # Define the command to run your application
 # Replace 'server.js' with your actual entry point file
 # If using compiled output, it might be 'dist/server.js'
+# CMD ["/bin/sh", "-c", "node src/scripts/createAdmin.js && exec node src/server.js"]
 CMD [ "node", "src/server.js" ]
