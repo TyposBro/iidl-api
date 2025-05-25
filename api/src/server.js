@@ -14,6 +14,7 @@ const newsRoutes = require("./routes/news");
 const galleryRoutes = require("./routes/gallery");
 const authRoutes = require("./routes/auth");
 const aboutRoutes = require("./routes/about");
+const metaRoutes = require("./routes/meta");
 
 const supabase = require("./supabaseClient"); // Import Supabase client
 const handleImageUpload = require("./utils/uploadHandler");
@@ -48,6 +49,7 @@ app.use("/api/news", newsRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/about", aboutRoutes);
+app.use("/api/meta", metaRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
