@@ -28,7 +28,7 @@ const teamSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
-  linkedin: {
+  linkedIn: {
     type: String,
   },
 });

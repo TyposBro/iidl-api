@@ -178,7 +178,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
 
     Object.keys(updates).forEach((key) => {
       // Update project field if it exists in the schema (preventing arbitrary fields)
-      if (projectSchema.path(key)) {
+      if (project.schema.path(key)) {
         project[key] = updates[key];
       }
     });
