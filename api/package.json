@@ -22,7 +22,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon ./src/server.js",
-    "debug": "nodemon --inspect ./src/server.js"
+    "debug": "nodemon --inspect ./src/server.js",
+    "dev": "nodemon ./src/server.js"
   },
   "author": "typosbro",
   "license": "ISC",

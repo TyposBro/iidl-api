@@ -8,14 +8,11 @@ services:
       # dockerfile: Dockerfile # Optional: if your Dockerfile has a non-standard name
     container_name: iidl_api_dev # Optional: specific container name
     ports:
-      # Map host port to container port (host:container)
-      # API accessed via http://localhost:8080 (or your mapped port) from host/browser
       - "${API_MAPPED_PORT:-8080}:${API_PORT:-8000}"
     environment:
-      # Use variables defined in the .env file
       MONGODB_URI: ${MONGODB_URI}
-      PORT: ${API_PORT:-8000} # Port the Node.js app listens on inside the container
-      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${API_PORT:-8000}
+      NODE_ENV: ${NODE_ENV:-development} # Ensure this is 'development' for nodemon
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
@@ -23,53 +20,45 @@ services:
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
       SUPABASE_BUCKET_NAME: ${SUPABASE_BUCKET_NAME}
+      CHOKIDAR_USEPOLLING: "true" # Helps with file watching in Docker volumes
     networks:
-      - iidl-network # Connect to the custom network
-    # Add volume mount for API development if needed (optional)
-    # volumes:
-    #   - ./api:/usr/src/app
-    #   # Prevent node_modules overwrite (only if mounting code and node_modules exist locally)
-    #   - /usr/src/app/node_modules
-    # # If using nodemon or similar for API hot-reloading
-    # command: npm run dev # Or your development script
+      - iidl-network
+    volumes:
+      # Mount local API code into the container for live updates
+      - ./api:/usr/src/app
+      # Use a Docker volume for node_modules inside the container.
+      # This uses the node_modules installed during the image build step
+      # and prevents host node_modules (if any) from overwriting.
+      - /usr/src/app/node_modules
+    # Command to start the API with nodemon for hot-reloading.
+    # Assumes you have a "dev" script in your api/package.json like "nodemon your-main-app-file.js"
+    # The `sh -c "npm install && ..."` part is if you want to ensure deps are installed on every start,
+    # but generally, dependencies are handled in the Dockerfile build.
+    # If nodemon is installed and your Dockerfile handles `npm install`, this is simpler:
+    command: npm run dev
+    # If you absolutely need to run npm install here (less ideal, slows startup):
+    # command: sh -c "npm install --legacy-peer-deps && npm run dev"
 
   # --- Frontend React Service (Development Mode) ---
   frontend:
-    # Use a standard Node image directly for development
-    # Ensure the version matches your project's requirements (e.g., package.json engines)
     image: node:20-alpine
     container_name: iidl_frontend_dev
-    working_dir: /app # Set the working directory inside the container
+    working_dir: /app
     ports:
-      # Map host port 3000 to container port 3000 (Vite's default)
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      # Vite uses VITE_ prefix by default.
-      # This URL is used by the BROWSER running on your HOST machine
-      # to access the API via its mapped port on the HOST.
       VITE_API_URL: http://localhost:${API_MAPPED_PORT:-8080}/api
       NODE_ENV: development
-      # CHOKIDAR_USEPOLLING often helps with file change detection within Docker volumes
       CHOKIDAR_USEPOLLING: "true"
     volumes:
-      # Mount local frontend code into the container for live updates
       - ./frontend:/app
-      # Create/use a Docker volume for node_modules inside the container.
-      # This prevents the host's node_modules (if any) from overwriting the
-      # container's potentially different modules and can improve performance.
       - /app/node_modules
-    # Command to start the Vite development server.
-    # 'npm start' should run 'vite --host' (or similar) to listen on 0.0.0.0
-    # which is required for port mapping to work from the host.
-    # Your package.json already has "start": "vite --host", which is correct.
     command: sh -c "npm install --legacy-peer-deps && npm start"
     depends_on:
-      - api # Wait for the api service to be ready (optional but good practice)
+      - api
     networks:
       - iidl-network
 
-# --- Custom Network Definition ---
-# Allows containers to communicate using service names (e.g., 'api')
 networks:
   iidl-network:
     driver: bridge
