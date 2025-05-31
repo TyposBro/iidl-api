@@ -9,6 +9,8 @@ const router = express.Router();
 const Publication = require("../models/publication"); // Adjust path if needed
 const authenticateAdmin = require("../middleware/auth"); // Adjust path if needed
 const supabase = require("../supabaseClient"); // Adjust path if needed
+const mongoose = require("mongoose");
+const { supabaseBucketName } = require("../config"); // Adjust path if needed
 
 // Helper function to extract filename from Supabase URL (ensure this is accessible)
 const extractFilenameFromUrl = (url) => {
@@ -16,10 +18,10 @@ const extractFilenameFromUrl = (url) => {
   try {
     const urlObject = new URL(url);
     const pathSegments = urlObject.pathname.split("/");
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
-    const bucketIndex = pathSegments.findIndex((segment) => segment === bucketName);
+    const bucketIndex = pathSegments.findIndex((segment) => segment === supabaseBucketName);
     if (bucketIndex !== -1 && bucketIndex + 1 < pathSegments.length) {
-      return decodeURIComponent(pathSegments.slice(bucketIndex + 1).join("/")); // Decode URI component potentially encoded filename
+      // Handle paths that might be nested within the bucket
+      return decodeURIComponent(pathSegments.slice(bucketIndex + 1).join("/"));
     }
     return null;
   } catch (error) {
@@ -32,19 +34,18 @@ const extractFilenameFromUrl = (url) => {
 
 // GET All Publications (For Admin Panel)
 router.get("/", authenticateAdmin, async (req, res) => {
-  // Make admin only? Or keep public? Assuming admin for list view.
   try {
-    const publications = await Publication.find().sort({ type: 1, year: -1, createdAt: -1 }); // Sort by type, then year
+    const publications = await Publication.find().sort({ type: 1, year: -1, createdAt: -1 });
     res.json(publications);
   } catch (err) {
     res.status(500).json({ message: "Error fetching publications: " + err.message });
   }
 });
 
-// GET Publications by Type (Public) - Replaces old /:listType approach
+// GET Publications by Type (Public)
 router.get("/type/:type", async (req, res) => {
   const validType = ["journal", "conference"];
-  const type = req.params.type?.toLowerCase(); // Normalize to lowercase
+  const type = req.params.type?.toLowerCase();
 
   if (!validType.includes(type)) {
     return res.status(400).json({ message: "Invalid publication type specified." });
@@ -60,19 +61,8 @@ router.get("/type/:type", async (req, res) => {
 
 // POST Create New Publication (Admin Only)
 router.post("/", authenticateAdmin, async (req, res) => {
-  const {
-    title,
-    authors, // Expecting an array from frontend
-    venue, // Changed from journal
-    year,
-    doi,
-    link,
-    abstract,
-    type, // Added type
-    image, // Added image URL from upload
-  } = req.body;
+  const { title, authors, venue, year, doi, link, abstract, type, location, image } = req.body;
 
-  // Basic Validation
   if (!title || !authors || !Array.isArray(authors) || authors.length === 0 || !year || !type) {
     return res
       .status(400)
@@ -92,13 +82,13 @@ router.post("/", authenticateAdmin, async (req, res) => {
     abstract,
     type,
     image,
+    location,
   });
 
   try {
     const newPublication = await publication.save();
     res.status(201).json(newPublication);
   } catch (err) {
-    // Check for duplicate key errors if you have unique indexes (e.g., on DOI)
     if (err.code === 11000) {
       res.status(409).json({
         message: "Error: A publication with similar unique identifiers might already exist.",
@@ -110,7 +100,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
   }
 });
 
-// GET Publication by ID (Public or Admin) - Keep as is for potential detail view
+// GET Publication by ID (Public or Admin)
 router.get("/:id", async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -138,60 +128,82 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     }
 
     const oldImageUrl = publication.image;
-    const newImageUrl = req.body.image; // Can be new URL, old URL, null, or undefined
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
+    const newImageUrl = req.body.image;
+    const { supabaseBucketName } = require("../config");
     const updates = req.body;
 
     // Validate required fields if they are being updated
-    if (updates.title === "") return res.status(400).json({ message: "Title cannot be empty." });
-    if (updates.authors && (!Array.isArray(updates.authors) || updates.authors.length === 0)) {
+    if (updates.hasOwnProperty("title") && updates.title === "") {
+      return res.status(400).json({ message: "Title cannot be empty." });
+    }
+    if (
+      updates.hasOwnProperty("authors") &&
+      (!Array.isArray(updates.authors) || updates.authors.length === 0)
+    ) {
       return res.status(400).json({ message: "Authors must be a non-empty array." });
     }
-    if (updates.year === "" || (updates.year && isNaN(parseInt(updates.year, 10)))) {
+    if (
+      updates.hasOwnProperty("year") &&
+      (updates.year === "" || (updates.year && isNaN(parseInt(updates.year, 10))))
+    ) {
       return res.status(400).json({ message: "Year must be a valid number." });
     }
-    if (updates.type && !["journal", "conference"].includes(updates.type)) {
+    if (
+      updates.hasOwnProperty("type") &&
+      updates.type &&
+      !["journal", "conference"].includes(updates.type)
+    ) {
       return res.status(400).json({ message: "Invalid publication type." });
     }
 
     // Update fields provided in the request body
-    // Use Object.assign or spread operator for cleaner updates
     Object.keys(updates).forEach((key) => {
-      // Only update fields that exist in the schema and are part of the request
-      if (publicationSchema.path(key) && updates[key] !== undefined) {
-        // Handle potential empty strings for optional fields by setting to undefined
-        if (["venue", "doi", "link", "abstract", "image"].includes(key) && updates[key] === "") {
-          publication[key] = undefined;
+      // Check if the key is a path in the schema before attempting to assign
+      if (publication.schema.path(key) && updates[key] !== undefined) {
+        // Corrected line
+        if (
+          ["venue", "doi", "link", "abstract", "image", "location"].includes(key) &&
+          updates[key] === ""
+        ) {
+          publication[key] = undefined; // Set to undefined to remove if it's an optional field and an empty string is passed
         } else {
           publication[key] = updates[key];
         }
+      } else if (key === "_id" || key === "createdAt" || key === "updatedAt") {
+        // Do nothing for protected fields, let Mongoose handle them
+      } else if (updates[key] !== undefined) {
+        // If the key is not in schema but present in updates (and not undefined),
+        // it might be an attempt to add an arbitrary field.
+        // For strict schemas, this won't be saved. For non-strict, it might.
+        // It's often better to ignore such fields or log a warning.
+        // console.warn(`Attempted to update non-schema field: ${key}`);
       }
     });
 
     // Handle image deletion from Supabase if URL changes
-    let imageDeleted = false;
     if (newImageUrl !== oldImageUrl && oldImageUrl) {
-      // If image changed AND there was an old one
       const filenameToDelete = extractFilenameFromUrl(oldImageUrl);
-      if (filenameToDelete && bucketName) {
+      if (filenameToDelete && supabaseBucketName) {
         console.log(
-          `Attempting to delete old image: ${filenameToDelete} from bucket: ${bucketName}`
+          `Attempting to delete old image: ${filenameToDelete} from bucket: ${supabaseBucketName}`
         );
-        const { error } = await supabase.storage.from(bucketName).remove([filenameToDelete]);
-        if (error) {
-          console.error("Error deleting old image from Supabase:", error.message);
-          // Decide if this should halt the update; maybe not if file non-existence is the error
+        const { error: deleteError } = await supabase.storage
+          .from(supabaseBucketName)
+          .remove([filenameToDelete]);
+        if (deleteError) {
+          console.error("Error deleting old image from Supabase:", deleteError.message);
+          // Potentially log this but don't necessarily halt the DB update
         } else {
           console.log(`Successfully deleted old image: ${filenameToDelete}`);
-          imageDeleted = true;
         }
       }
     }
-    // Explicitly set image field based on request (handles setting to null/undefined)
-    publication.image = newImageUrl === null ? undefined : newImageUrl;
-
-    // Mongoose `timestamps: true` handles `updatedAt` automatically on `save()`
-    // publication.updatedAt = Date.now();
+    // Explicitly set image field based on request (handles setting to null/undefined to clear image)
+    // This ensures that if `updates.image` was null or empty string (and handled above), it's correctly set.
+    if (updates.hasOwnProperty("image")) {
+      publication.image =
+        updates.image === "" || updates.image === null ? undefined : updates.image;
+    }
 
     const updatedPublication = await publication.save();
     res.json(updatedPublication);
@@ -203,6 +215,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
         error: err.keyValue,
       });
     } else {
+      console.error("Full error during update:", err); // Log the full error for more details
       res.status(500).json({ message: "Error updating publication: " + err.message });
     }
   }
@@ -220,30 +233,28 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     }
 
     const imageUrlToDelete = publication.image;
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
 
-    // Delete associated image from Supabase first
     if (imageUrlToDelete) {
       const filenameToDelete = extractFilenameFromUrl(imageUrlToDelete);
-      if (filenameToDelete && bucketName) {
-        console.log(`Attempting to delete image: ${filenameToDelete} from bucket: ${bucketName}`);
-        const { error } = await supabase.storage.from(bucketName).remove([filenameToDelete]);
+      if (filenameToDelete && supabaseBucketName) {
+        console.log(
+          `Attempting to delete image: ${filenameToDelete} from bucket: ${supabaseBucketName}`
+        );
+        const { error } = await supabase.storage
+          .from(supabaseBucketName)
+          .remove([filenameToDelete]);
         if (error) {
           console.error(
             "Error deleting image from Supabase during publication deletion:",
             error.message
           );
-          // Proceed with DB deletion even if image deletion fails? Log it.
         } else {
           console.log(`Successfully deleted image: ${filenameToDelete}`);
         }
       }
     }
 
-    // Use deleteOne() method on the document instance
     await publication.deleteOne();
-    // Or use the static method: await Publication.findByIdAndDelete(req.params.id);
-
     res.json({ message: "Deleted publication" });
   } catch (err) {
     res.status(500).json({ message: "Error deleting publication: " + err.message });

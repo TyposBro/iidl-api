@@ -4,10 +4,9 @@
 // It also includes error handling and logging.
 //
 const crypto = require("crypto");
-
+const { supabaseBucketName } = require("../config"); // Import bucket name from config
 const handleImageUpload = async (req, res, supabase) => {
   try {
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
     const uploadedImageUrls = [];
 
     for (const file of req.files) {
@@ -17,7 +16,7 @@ const handleImageUpload = async (req, res, supabase) => {
 
       // Check if an image with the same checksum already exists
       const { data: existingFiles, error: listError } = await supabase.storage
-        .from(bucketName)
+        .from(supabaseBucketName)
         .list("", { search: checksum }); // Search for filename containing the checksum
 
       if (listError) {
@@ -28,7 +27,7 @@ const handleImageUpload = async (req, res, supabase) => {
       if (existingFiles && existingFiles.length > 0) {
         // Duplicate found, get the public URL of the existing file
         const { data: publicUrlData } = supabase.storage
-          .from(bucketName)
+          .from(supabaseBucketName)
           .getPublicUrl(existingFiles[0].name);
         uploadedImageUrls.push(publicUrlData.publicUrl);
         console.log(
@@ -37,7 +36,7 @@ const handleImageUpload = async (req, res, supabase) => {
       } else {
         // No duplicate found, upload the new image
         const { data, error: uploadError } = await supabase.storage
-          .from(bucketName)
+          .from(supabaseBucketName)
           .upload(filename, buffer, {
             contentType: file.mimetype,
             upsert: false,
@@ -50,7 +49,9 @@ const handleImageUpload = async (req, res, supabase) => {
             .json({ message: `Failed to upload image to Supabase: ${uploadError.message}` });
         }
 
-        const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(data.path);
+        const { data: publicUrlData } = supabase.storage
+          .from(supabaseBucketName)
+          .getPublicUrl(data.path);
         uploadedImageUrls.push(publicUrlData.publicUrl);
         console.log(`Uploaded new image (checksum: ${checksum}), URL: ${publicUrlData.publicUrl}`);
       }

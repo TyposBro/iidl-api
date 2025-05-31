@@ -11,6 +11,7 @@ const router = express.Router();
 const TeamMember = require("../models/team");
 const authenticateAdmin = require("../middleware/auth");
 const supabase = require("../supabaseClient");
+const { supabaseBucketName } = require("../config");
 
 // Function to extract filename from URL (same as in gallery routes)
 const extractFilenameFromUrl = (url) => {
@@ -46,6 +47,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
       img: req.body.img, // Expecting image URL in the body
       type: req.body.type,
       bio: req.body.bio,
+      linkedIn: req.body.linkedIn,
     });
 
     const newTeamMember = await teamMember.save();
@@ -80,6 +82,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     if (req.body.role) teamMember.role = req.body.role;
     if (req.body.type) teamMember.type = req.body.type;
     if (req.body.bio) teamMember.bio = req.body.bio;
+    if (req.body.linkedIn) teamMember.linkedIn = req.body.linkedIn;
 
     // Handle image update
     if (req.body.img && req.body.img !== teamMember.img) {
@@ -87,9 +90,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
       if (teamMember.img) {
         const filename = extractFilenameFromUrl(teamMember.img);
         if (filename) {
-          const { error } = await supabase.storage
-            .from(process.env.SUPABASE_BUCKET_NAME)
-            .remove([filename]);
+          const { error } = await supabase.storage.from(supabaseBucketName).remove([filename]);
           if (error) {
             console.error("Error deleting old image:", error);
           }
@@ -117,9 +118,7 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     if (teamMember.img) {
       const filename = extractFilenameFromUrl(teamMember.img);
       if (filename) {
-        const { error } = await supabase.storage
-          .from(process.env.SUPABASE_BUCKET_NAME)
-          .remove([filename]);
+        const { error } = await supabase.storage.from(supabaseBucketName).remove([filename]);
         if (error) {
           console.error("Error deleting team member image:", error);
         }

@@ -10,11 +10,12 @@ const router = express.Router();
 const Professor = require("../models/professor");
 const authenticateAdmin = require("../middleware/auth");
 
-// GET all professors
+// GET all professor
 router.get("/", async (req, res) => {
+  console.log("Fetching all professors");
   try {
-    const professors = await Professor.find();
-    res.json(professors);
+    const professor = await Professor.findOne();
+    res.json(professor);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

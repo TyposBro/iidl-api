@@ -2,6 +2,7 @@
 // Middleware to authenticate admin users
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { jwtSecret } = require("../config"); // Adjust path if needed
 
 const authenticateAdmin = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -12,7 +13,7 @@ const authenticateAdmin = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, jwtSecret, (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Invalid token" });
     }

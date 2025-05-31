@@ -1,57 +1,48 @@
 // {PATH_TO_THE_PROJECT}/api/src/models/about.js
 const mongoose = require("mongoose");
 
-// Define the schema for items within the body.list array
-const bodyListItemSchema = new mongoose.Schema(
+// Schema for content blocks within a track
+const contentBlockSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Title is required."],
+      trim: true,
+    },
+    text: {
+      type: String,
+      required: [true, "Text is required."],
+      trim: true,
+    },
+    img: {
+      type: String,
+      required: [true, "Image is required."], // Assuming this is a URL or path
+      trim: true,
+    },
+  },
+  { _id: true }
+);
+
+// Schema for an individual research track
+const trackSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: [true, "Track title is required."],
+      trim: true,
     },
-    text: {
-      type: [String], // Array of strings (paragraphs)
-      required: [true, "Track text description is required."],
-    },
-    img: {
-      type: [String], // Array of image URLs for the track
-      // Not strictly required, can be empty
-    },
-  },
-  { _id: false }
-); // Don't generate automatic _id for subdocuments in the array
-
-// Define the main About page schema
-const aboutSchema = new mongoose.Schema(
-  {
-    head: {
-      title: {
-        type: String,
-        required: [true, "Head title is required."],
-        trim: true,
-      },
-      description: {
-        type: String,
-        required: [true, "Head description is required."],
-        trim: true,
-      },
-    },
-    body: {
-      title: {
-        type: String,
-        required: [true, "Body title is required."],
-        trim: true,
-      },
-      list: {
-        type: [bodyListItemSchema], // Array of items following the sub-schema
-        default: [], // Default to an empty list
-      },
+    content: {
+      type: [contentBlockSchema],
+      validate: [
+        // Custom validator to ensure array is not empty
+        (val) => val.length > 0,
+        "At least one content block is required.",
+      ],
+      required: [true, "Content blocks are required."],
     },
   },
-  {
-    timestamps: true, // Automatically add createdAt and updatedAt timestamps
-  }
+  { _id: true, timestamps: true } // Added timestamps for createdAt and updatedAt
 );
 
-// Create and export the model
-const AboutPage = mongoose.model("AboutPage", aboutSchema);
-module.exports = AboutPage;
+const AboutPageContent = mongoose.model("AboutPageContent", trackSchema);
+module.exports = AboutPageContent;

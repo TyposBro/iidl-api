@@ -1,5 +1,6 @@
 # {PATH_TO_THE_PROJECT}/.github/workflows/action.yaml
 name: Docker Image CI and Deploy
+description: Build, push Docker images and deploy to Kubernetes
 
 on:
   push:
@@ -56,55 +57,3 @@ jobs:
           echo "Pushing Frontend Image..."
           docker push $IMAGE_TAG
           echo "frontend_image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-      # --- Deployment Steps ---
-
-      # Step 5: Install envsubst (if not already present on runner)
-      - name: Install gettext (for envsubst)
-        run: sudo apt-get update && sudo apt-get install -y gettext-base
-
-      # Step 6: Substitute secrets in Kubernetes manifests
-      - name: Substitute secrets in secrets.yaml
-        env:
-          K8S_NAMESPACE: "main-homepage" # Namespace
-          # Map GitHub Secrets to Environment Variables matching placeholders
-          MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
-          MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          # Add mappings for any other secrets you defined
-          # ANOTHER_SECRET_KEY_FROM_GITHUB: ${{ secrets.ANOTHER_SECRET }}
-        run: |
-          # Define the path to your template file
-          SECRETS_TEMPLATE_FILE=".cd-manifest/api-secrets.yaml"
-          # Create a temporary file for the output
-          PROCESSED_SECRETS_FILE=$(mktemp)
-          # Perform substitution
-          envsubst < "$SECRETS_TEMPLATE_FILE" > "$PROCESSED_SECRETS_FILE"
-          # Overwrite the original file with the processed content
-          # This is simpler for the subsequent kubectl apply step
-          mv "$PROCESSED_SECRETS_FILE" "$SECRETS_TEMPLATE_FILE"
-          echo "Substituted secrets in $SECRETS_TEMPLATE_FILE"
-          # Optional: Mask secrets if you print the file for debugging (Not recommended)
-          # echo "--- Processed Secrets File ---"
-          # cat $SECRETS_TEMPLATE_FILE # Be careful printing secrets!
-
-      # Step 7: Deploy to Kubernetes using kubectl
-      - name: Deploy to Kubernetes
-        env:
-          # Provide KUBECONFIG from GitHub Secrets
-          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG }}
-        run: |
-          echo "Setting up KUBECONFIG..."
-          # Decode the base64 KUBECONFIG secret and write to a file
-          echo "${KUBECONFIG_DATA}" | base64 -d > kubeconfig.yaml
-          export KUBECONFIG=kubeconfig.yaml
-
-          echo "Applying Kubernetes manifests..."
-          # Apply ALL manifests in the directory. kubectl will handle creating/updating.
-          # It will now use the api-secrets.yaml file that has had secrets substituted.
-          # Ensure your Deployments reference the correct image tags if using dynamic tags
-          # (You might need kustomize or sed here to update image tags if not handled otherwise)
-          kubectl apply -f .cd-manifest/
-
-          echo "Cleaning up KUBECONFIG..."
-          rm kubeconfig.yaml # Clean up the temporary kubeconfig file

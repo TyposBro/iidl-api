@@ -22,11 +22,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon ./src/server.js",
-    "debug": "nodemon --inspect ./src/server.js"
+    "debug": "nodemon --inspect ./src/server.js",
+    "dev": "nodemon ./src/server.js"
   },
   "author": "typosbro",
   "license": "ISC",
   "description": "",
   "git": "//github.com/typosbro/iidl-api",
-  "private": true
+  "private": true,
+  "type": "commonjs"
 }
