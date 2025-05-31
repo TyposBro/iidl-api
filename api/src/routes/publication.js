@@ -10,6 +10,7 @@ const Publication = require("../models/publication"); // Adjust path if needed
 const authenticateAdmin = require("../middleware/auth"); // Adjust path if needed
 const supabase = require("../supabaseClient"); // Adjust path if needed
 const mongoose = require("mongoose");
+const { supabaseBucketName } = require("../config"); // Adjust path if needed
 
 // Helper function to extract filename from Supabase URL (ensure this is accessible)
 const extractFilenameFromUrl = (url) => {
@@ -17,8 +18,7 @@ const extractFilenameFromUrl = (url) => {
   try {
     const urlObject = new URL(url);
     const pathSegments = urlObject.pathname.split("/");
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
-    const bucketIndex = pathSegments.findIndex((segment) => segment === bucketName);
+    const bucketIndex = pathSegments.findIndex((segment) => segment === supabaseBucketName);
     if (bucketIndex !== -1 && bucketIndex + 1 < pathSegments.length) {
       // Handle paths that might be nested within the bucket
       return decodeURIComponent(pathSegments.slice(bucketIndex + 1).join("/"));
@@ -129,7 +129,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
 
     const oldImageUrl = publication.image;
     const newImageUrl = req.body.image;
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
+    const { supabaseBucketName } = require("../config");
     const updates = req.body;
 
     // Validate required fields if they are being updated
@@ -183,12 +183,12 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     // Handle image deletion from Supabase if URL changes
     if (newImageUrl !== oldImageUrl && oldImageUrl) {
       const filenameToDelete = extractFilenameFromUrl(oldImageUrl);
-      if (filenameToDelete && bucketName) {
+      if (filenameToDelete && supabaseBucketName) {
         console.log(
-          `Attempting to delete old image: ${filenameToDelete} from bucket: ${bucketName}`
+          `Attempting to delete old image: ${filenameToDelete} from bucket: ${supabaseBucketName}`
         );
         const { error: deleteError } = await supabase.storage
-          .from(bucketName)
+          .from(supabaseBucketName)
           .remove([filenameToDelete]);
         if (deleteError) {
           console.error("Error deleting old image from Supabase:", deleteError.message);
@@ -233,13 +233,16 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     }
 
     const imageUrlToDelete = publication.image;
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
 
     if (imageUrlToDelete) {
       const filenameToDelete = extractFilenameFromUrl(imageUrlToDelete);
-      if (filenameToDelete && bucketName) {
-        console.log(`Attempting to delete image: ${filenameToDelete} from bucket: ${bucketName}`);
-        const { error } = await supabase.storage.from(bucketName).remove([filenameToDelete]);
+      if (filenameToDelete && supabaseBucketName) {
+        console.log(
+          `Attempting to delete image: ${filenameToDelete} from bucket: ${supabaseBucketName}`
+        );
+        const { error } = await supabase.storage
+          .from(supabaseBucketName)
+          .remove([filenameToDelete]);
         if (error) {
           console.error(
             "Error deleting image from Supabase during publication deletion:",

@@ -9,13 +9,10 @@
 
 const mongoose = require("mongoose");
 const Admin = require("../models/admin"); // Adjust path if needed
+const { uri, username, password } = require("../config"); // Adjust path if needed
 require("dotenv").config(); // Load environment variables
 
-const uri = process.env.MONGODB_URI;
-const username = process.env.ADMIN_USERNAME;
-const password = process.env.ADMIN_PASSWORD;
-
-export async function createAdminUser() {
+async function createAdminUser() {
   try {
     await mongoose.connect(uri);
     console.log("Connected to MongoDB");

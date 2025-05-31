@@ -23,56 +23,6 @@ spec:
         app: iidl-api # Labels applied to the Pods created by this Deployment
     spec:
       # --- INIT CONTAINER SECTION ---
-      initContainers:
-        - name: init-create-admin # Name for the init container
-          # Use the SAME image as your main API container
-          image: unist-iidl-api:local # <-- LOCAL: Use local tag
-          # image: unist.krs.ncr.gov-ntruss.com/unist-iidl-api:1.0.0 # <-- PRODUCTION: Use registry image
-          imagePullPolicy: IfNotPresent # Or Always for production
-
-          # Override the default command to run ONLY the admin creation script
-          command: ["node", "src/scripts/createAdmin.js"] # Adjust path if needed
-
-          # Inject the SAME necessary environment variables from Secrets
-          env:
-            # --- Using hardcoded values based on previous example ---
-            # FIXME: Replace with secretKeyRef for production!
-            - name: ADMIN_USERNAME
-              value: "123" # Assuming this matches the value in .env.local for testing
-            - name: ADMIN_PASSWORD
-              value: "123" # Assuming this matches the value in .env.local for testing
-            # Inject MongoDB Username from the Kubernetes Secret
-            - name: MONGO_USERNAME
-              value: "iidl_user" #FIXME: REMOVE THIS LINE FOR PRODUCTION
-              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
-              # valueFrom:
-              #   secretKeyRef:
-              #     name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
-              #     key: MONGO_ROOT_USERNAME # <-- LOCAL: Key within that Secret for the username
-              #! UNCOMMENT THIS SECTION FOR PRODUCTION
-
-            # Inject MongoDB Password from the Kubernetes Secret
-            - name: MONGO_PASSWORD
-              value: "iidl_password" #FIXME: REMOVE THIS LINE FOR PRODUCTION
-              #FIXME: UNCOMMENT THIS SECTION FOR PRODUCTION
-              # valueFrom:
-              #   secretKeyRef:
-              #     name: mongo-secret # <-- LOCAL: Name of the Secret created by local-mongo-secret.yaml
-              #     key: MONGO_ROOT_PASSWORD # <-- LOCAL: Key within that Secret for the password
-              #! UNCOMMENT THIS SECTION FOR PRODUCTION
-
-            - name: MONGO_DB_NAME
-              value: "iidl-db"
-            # Construct the MongoDB Connection String URI
-            # Uses the injected variables and the K8s Service name for MongoDB ('mongo-service')
-            - name: MONGODB_URI
-              value: "mongodb+srv://$(MONGO_USERNAME):$(MONGO_PASSWORD)@cluster0.zyb01.mongodb.net/$(MONGO_DB_NAME)?retryWrites=true&w=majority&appName=Cluster0"
-              #                            ^^^^^^^^^^^^^ Service name from mongo-setup.yaml
-              #                            ^^^^^^^^^^^^^ CHANGE to your local DB name!
-      # --- MAIN API CONTAINER SECTION ---
-
-      # imagePullSecrets: # Usually only needed if pulling from a private registry - uncomment for prod
-      # - name: regcred
       containers:
         - name: iidl-api-container # Name of the container within the pod
           image: unist-iidl-api:local # <-- LOCAL: Use locally built image tag

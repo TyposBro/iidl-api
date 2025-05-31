@@ -29,5 +29,6 @@
   "license": "ISC",
   "description": "",
   "git": "//github.com/typosbro/iidl-api",
-  "private": true
+  "private": true,
+  "type": "commonjs"
 }

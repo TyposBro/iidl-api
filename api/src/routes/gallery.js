@@ -12,6 +12,7 @@ const router = express.Router();
 const GalleryEvent = require("../models/gallery");
 const authenticateAdmin = require("../middleware/auth");
 const supabase = require("../supabaseClient"); // Import Supabase client
+const { supabaseBucketName } = require("../config"); // Import configuration for Supabase bucket
 
 // --- API Endpoints for Gallery ---
 
@@ -66,7 +67,6 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
 
     const oldImages = galleryEvent.images || [];
     const newImages = req.body.images || [];
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
 
     // Identify images to delete
     const imagesToDelete = oldImages.filter((oldImage) => !newImages.includes(oldImage));
@@ -75,7 +75,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     for (const imageUrl of imagesToDelete) {
       const filename = extractFilenameFromUrl(imageUrl);
       if (filename) {
-        const { error } = await supabase.storage.from(bucketName).remove([filename]);
+        const { error } = await supabase.storage.from(supabaseBucketName).remove([filename]);
         if (error) {
           console.error("Error deleting image from Supabase:", error);
           // Optionally, you might want to handle this error more specifically
@@ -107,13 +107,12 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     }
 
     const imagesToDelete = galleryEvent.images || [];
-    const bucketName = process.env.SUPABASE_BUCKET_NAME;
 
     // Delete associated images from Supabase
     for (const imageUrl of imagesToDelete) {
       const filename = extractFilenameFromUrl(imageUrl);
       if (filename) {
-        const { error } = await supabase.storage.from(bucketName).remove([filename]);
+        const { error } = await supabase.storage.from(supabaseBucketName).remove([filename]);
         if (error) {
           console.error("Error deleting image from Supabase:", error);
           // Optionally, you might want to handle this error more specifically

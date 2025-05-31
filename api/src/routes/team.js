@@ -11,6 +11,7 @@ const router = express.Router();
 const TeamMember = require("../models/team");
 const authenticateAdmin = require("../middleware/auth");
 const supabase = require("../supabaseClient");
+const { supabaseBucketName } = require("../config");
 
 // Function to extract filename from URL (same as in gallery routes)
 const extractFilenameFromUrl = (url) => {
@@ -89,9 +90,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
       if (teamMember.img) {
         const filename = extractFilenameFromUrl(teamMember.img);
         if (filename) {
-          const { error } = await supabase.storage
-            .from(process.env.SUPABASE_BUCKET_NAME)
-            .remove([filename]);
+          const { error } = await supabase.storage.from(supabaseBucketName).remove([filename]);
           if (error) {
             console.error("Error deleting old image:", error);
           }
@@ -119,9 +118,7 @@ router.delete("/:id", authenticateAdmin, async (req, res) => {
     if (teamMember.img) {
       const filename = extractFilenameFromUrl(teamMember.img);
       if (filename) {
-        const { error } = await supabase.storage
-          .from(process.env.SUPABASE_BUCKET_NAME)
-          .remove([filename]);
+        const { error } = await supabase.storage.from(supabaseBucketName).remove([filename]);
         if (error) {
           console.error("Error deleting team member image:", error);
         }
