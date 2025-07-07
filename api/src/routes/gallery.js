@@ -19,7 +19,7 @@ const { supabaseBucketName } = require("../config"); // Import configuration for
 // GET All Gallery Events (Public)
 router.get("/", async (req, res) => {
   try {
-    const galleryEvents = await GalleryEvent.find().sort({ date: "desc" }); // Sort by date
+    const galleryEvents = await GalleryEvent.find().sort({ number: -1 });
     res.json(galleryEvents);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -30,6 +30,7 @@ router.get("/", async (req, res) => {
 router.post("/", authenticateAdmin, async (req, res) => {
   const galleryEvent = new GalleryEvent({
     title: req.body.title,
+    number: req.body.number,
     date: req.body.date,
     location: req.body.location,
     images: req.body.images,
@@ -86,6 +87,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     }
 
     if (req.body.title) galleryEvent.title = req.body.title;
+    if (req.body.number) galleryEvent.number = req.body.number;
     if (req.body.date) galleryEvent.date = req.body.date;
     if (req.body.location) galleryEvent.location = req.body.location;
     galleryEvent.images = newImages; // Update with the new array of images

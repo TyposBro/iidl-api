@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const newsSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  number: { type: Number, required: true }, // Added number field
   date: { type: String, required: true },
   images: [String],
   content: { type: String, required: true },

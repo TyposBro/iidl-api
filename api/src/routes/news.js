@@ -16,7 +16,7 @@ const authenticateAdmin = require("../middleware/auth");
 // GET All News Items (Public)
 router.get("/", async (req, res) => {
   try {
-    const newsItems = await NewsItem.find().sort({ createdAt: "desc" }); // Sort by creation date
+    const newsItems = await NewsItem.find().sort({ number: -1 });
     res.json(newsItems);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -27,6 +27,7 @@ router.get("/", async (req, res) => {
 router.post("/", authenticateAdmin, async (req, res) => {
   const newsItem = new NewsItem({
     title: req.body.title,
+    number: req.body.number,
     content: req.body.content,
     images: req.body.images,
     date: req.body.date || Date.now(),
@@ -49,6 +50,7 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
       return res.status(404).json({ message: "Cannot find news item" });
     }
     if (req.body.title) newsItem.title = req.body.title;
+    if (req.body.number) newsItem.number = req.body.number;
     if (req.body.content) newsItem.content = req.body.content;
     if (req.body.images) newsItem.images = req.body.images;
     if (req.body.type) newsItem.type = req.body.type;

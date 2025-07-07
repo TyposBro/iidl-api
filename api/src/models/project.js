@@ -12,6 +12,10 @@ const projectSchema = new mongoose.Schema(
       type: String,
       required: [true, "Project title is required"],
     },
+    number: {
+      type: Number,
+      required: [true, "Project number is required"],
+    },
     subtitle: {
       // Short description or subtitle
       type: String,
@@ -39,18 +43,12 @@ const projectSchema = new mongoose.Schema(
       // Relevant for completed projects and awards
       type: Number,
     },
-    authors: {
-      // Relevant for awards or publications associated with projects
-      type: String, // Could be a comma-separated string or an Array of Strings
-    },
+    authors: { type: [String] },
+    tags: { type: [String] },
     awardName: {
       // Specific name of the award (e.g., "Reddot Design Award")
       type: String,
     },
-    tags: [String], // For filtering or categorization
-    // Optional: Add start/end dates if needed for current/completed projects
-    // startDate: Date,
-    // endDate: Date,
   },
   { timestamps: true }
 ); // Adds createdAt and updatedAt automatically
