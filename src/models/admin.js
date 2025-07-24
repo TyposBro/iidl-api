@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/admin.js
+// {PATH_TO_THE_PROJECT}/src/models/admin.js
 // Model for the Admin user
 const mongoose = require("mongoose");
 

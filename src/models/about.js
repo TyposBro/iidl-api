@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/about.js
+// {PATH_TO_THE_PROJECT}/src/models/about.js
 const mongoose = require("mongoose");
 
 // Schema for content blocks within a track

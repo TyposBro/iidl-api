@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/team.js
+// {PATH_TO_THE_PROJECT}/src/models/team.js
 // This file defines a Mongoose schema and model for team members.
 // It includes fields for name, role, image, type (current or alumni), and an optional bio.
 // It uses Mongoose to create a model named "TeamMember" based on the schema.

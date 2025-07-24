@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/professor.js
+// {PATH_TO_THE_PROJECT}/src/models/professor.js
 // This file defines a Mongoose schema and model for professors.
 // It includes fields for name, role, image, description, CV link, email, phone,
 // statistics, interests, and background.

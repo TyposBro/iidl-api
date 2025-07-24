@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/utils/uploadHandler.js
+// {PATH_TO_THE_PROJECT}/src/utils/uploadHandler.js
 // This file contains the logic for handling image uploads to Supabase.
 // It includes functions for uploading images, checking for duplicates, and generating public URLs.
 // It also includes error handling and logging.

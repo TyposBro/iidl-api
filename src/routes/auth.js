@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/routes/auth.js
+// {PATH_TO_THE_PROJECT}/src/routes/auth.js
 // This file defines an Express router for handling authentication-related routes.
 // It includes a login route for admin users.
 // The login route checks the provided username and password against the database.

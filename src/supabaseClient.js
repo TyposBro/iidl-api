@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/supabaseClient.js
+// {PATH_TO_THE_PROJECT}/src/supabaseClient.js
 
 require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");

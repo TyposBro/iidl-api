@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/routes/news.js
+// {PATH_TO_THE_PROJECT}/src/routes/news.js
 // This file defines the API routes for managing news items.
 // It includes routes for getting all news items, creating a new news item,
 // updating an existing news item, and deleting a news item.

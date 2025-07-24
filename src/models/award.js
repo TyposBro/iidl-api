@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/award.js
+// {PATH_TO_THE_PROJECT}/src/models/award.js
 // Model for the Awards page
 
 const mongoose = require("mongoose");

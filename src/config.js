@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/config/index.js
+// {PATH_TO_THE_PROJECT}/src/config/index.js
 
 // Load environment variables
 require("dotenv").config();

@@ -1,7 +1,7 @@
 const AboutPageContent = require("../models/about");
 
 // @desc    Create new About Page Content (a track)
-// @route   POST /api/about
+// @route   POST /about
 // @access  Public (adjust as needed, e.g., add authentication middleware)
 exports.createAboutContent = async (req, res) => {
   try {
@@ -26,7 +26,7 @@ exports.createAboutContent = async (req, res) => {
 };
 
 // @desc    Get all About Page Content (all tracks)
-// @route   GET /api/about
+// @route   GET /about
 // @access  Public
 exports.getAllAboutContent = async (req, res) => {
   try {
@@ -46,7 +46,7 @@ exports.getAllAboutContent = async (req, res) => {
 };
 
 // @desc    Get single About Page Content (a track) by ID
-// @route   GET /api/about/:id
+// @route   GET /about/:id
 // @access  Public
 exports.getAboutContentById = async (req, res) => {
   try {
@@ -73,7 +73,7 @@ exports.getAboutContentById = async (req, res) => {
 };
 
 // @desc    Update About Page Content (a track) by ID
-// @route   PUT /api/about/:id
+// @route   PUT /about/:id
 // @access  Public (adjust as needed)
 exports.updateAboutContent = async (req, res) => {
   try {
@@ -125,7 +125,7 @@ exports.updateAboutContent = async (req, res) => {
 };
 
 // @desc    Delete About Page Content (a track) by ID
-// @route   DELETE /api/about/:id
+// @route   DELETE /about/:id
 // @access  Public (adjust as needed)
 exports.deleteAboutContent = async (req, res) => {
   try {

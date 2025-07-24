@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/routes/project.js
+// {PATH_TO_THE_PROJECT}/src/routes/project.js
 // This file defines the API routes for managing projects.
 // It includes routes for getting all projects, getting projects by status,
 // creating a new project, updating an existing project, and deleting a project.

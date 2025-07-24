@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/routes/gallery.js
+// {PATH_TO_THE_PROJECT}/src/routes/gallery.js
 // This file defines the API routes for managing gallery events.
 // It includes routes for getting all gallery events, creating a new event,
 // updating an event by ID, and deleting an event by ID.

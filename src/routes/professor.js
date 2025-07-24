@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/routes/professor.js
+// {PATH_TO_THE_PROJECT}/src/routes/professor.js
 // This file defines the routes for managing professors in the application.
 // It includes routes for getting all professors, adding a new professor,
 // updating an existing professor, and deleting a professor.

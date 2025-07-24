@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/scripts/createAdmin.js
+// {PATH_TO_THE_PROJECT}/src/scripts/createAdmin.js
 // This script creates an admin user in the MongoDB database.
 // It connects to the database, checks if an admin user already exists,
 // and if not, creates a new admin user with a specified username and password.

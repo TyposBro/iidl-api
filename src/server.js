@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/server.js
+// {PATH_TO_THE_PROJECT}/src/server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -34,23 +34,23 @@ mongoose
   .then(() => console.log("MongoDB database connection established successfully"))
   .catch((err) => console.log(err));
 
-app.post("/api/upload", upload.array("images", 10), async (req, res) => {
+app.post("/upload", upload.array("images", 10), async (req, res) => {
   await handleImageUpload(req, res, supabase);
 });
 
 // API Routes
-app.use("/api/prof", professorRoutes);
-app.use("/api/team", teamRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/publications", publicationRoutes);
-app.use("/api/news", newsRoutes);
-app.use("/api/gallery", galleryRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/about", aboutRoutes);
-app.use("/api/meta", metaRoutes);
+app.use("/prof", professorRoutes);
+app.use("/team", teamRoutes);
+app.use("/projects", projectRoutes);
+app.use("/publications", publicationRoutes);
+app.use("/news", newsRoutes);
+app.use("/gallery", galleryRoutes);
+app.use("/auth", authRoutes);
+app.use("/about", aboutRoutes);
+app.use("/meta", metaRoutes);
 
 // Health Check Route
-app.get("/api/health", (req, res) => {
+app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 

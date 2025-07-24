@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/news.js
+// {PATH_TO_THE_PROJECT}/src/models/news.js
 // This file defines a Mongoose schema and model for news articles.
 // It includes fields for title, date, images, content, and type.
 

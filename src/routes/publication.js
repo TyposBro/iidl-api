@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/routes/publication.js
+// {PATH_TO_THE_PROJECT}/src/routes/publication.js
 // This file contains the API routes for managing publications.
 // It includes routes for creating, reading, updating, and deleting publications.
 // It also includes middleware for authentication and authorization.

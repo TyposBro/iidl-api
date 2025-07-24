@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/utils/gridfsUploadHandler.js
+// {PATH_TO_THE_PROJECT}/src/utils/gridfsUploadHandler.js
 // Handles processing after files have been uploaded to GridFS by multer middleware.
 
 // const crypto = require('crypto'); // Only needed if implementing checksum deduplication here
@@ -28,7 +28,7 @@ const handleGridfsUpload = async (req, res) => {
           return null;
         }
         // Construct the relative URL using the file ID
-        return `/api/images/${file.id.toString()}`;
+        return `/images/${file.id.toString()}`;
       })
       .filter((url) => url !== null); // Filter out any entries where an ID was missing
 

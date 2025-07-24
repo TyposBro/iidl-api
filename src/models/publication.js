@@ -1,4 +1,4 @@
-// {PATH_TO_THE_PROJECT}/api/src/models/publication.js
+// {PATH_TO_THE_PROJECT}/src/models/publication.js
 // This file defines a Mongoose schema and model for publications.
 // It includes fields for title, authors, venue, year, doi, link, abstract,
 // type, image, and timestamps.
