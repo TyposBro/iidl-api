@@ -15,11 +15,15 @@ export type AuthVariables = {
   adminId: string;
 };
 
-// Create a Hono instance with typed environment and variables
-export type App = Hono<{
+// This is the generic context type for our Hono app.
+// We'll use this in all our route files.
+export type AppContext = {
   Bindings: Env;
   Variables: AuthVariables;
-}>;
+};
+
+// Re-export the Hono instance type for convenience
+export type App = Hono<AppContext>;
 
 // --- Data Models (mirroring D1 schema) ---
 
