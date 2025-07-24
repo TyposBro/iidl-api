@@ -1,0 +1,23 @@
+name = "hono-iidl-api"
+main = "src/index.ts"
+compatibility_date = "2024-07-12"
+
+# Binding for D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "iidl-api-db"
+database_id = "<your-d1-database-id>" # This will be filled in by `wrangler d1 create`
+
+# Binding for R2 Bucket
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "iidl-api-bucket"
+
+# Environment variables (accessible in the worker)
+[vars]
+ADMIN_USERNAME = "admin"
+# Make sure this URL is correct and has a trailing slash
+R2_PUBLIC_URL = "https://your-public-r2-url.com/"
+
+# Secrets (must be set using `wrangler secret put`)
+# - JWT_SECRET

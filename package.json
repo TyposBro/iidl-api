@@ -1,34 +1,19 @@
 {
-  "dependencies": {
-    "@supabase/supabase-js": "^2.49.4",
-    "bcrypt": "^5.1.1",
-    "body-parser": "^2.2.0",
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.15.0",
-    "mongoose": "^8.13.1",
-    "multer": "^1.4.5-lts.2",
-    "multer-gridfs-storage": "^5.0.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
-  },
   "name": "iidl-api",
   "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./src/server.js",
-    "debug": "nodemon --inspect ./src/server.js",
-    "dev": "nodemon ./src/server.js"
-  },
-  "author": "typosbro",
-  "license": "ISC",
-  "description": "",
-  "git": "//github.com/typosbro/iidl-api",
   "private": true,
-  "type": "commonjs"
+  "description": "API for IIDL website on Cloudflare Workers",
+  "author": "typosbro (converted by AI)",
+  "license": "ISC",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20250724.0",
+    "hono": "^4.8.5",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.26.0"
+  }
 }
