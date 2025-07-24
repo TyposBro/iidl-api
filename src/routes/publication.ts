@@ -1,12 +1,12 @@
 // src/routes/publication.ts
 import { Hono } from "hono";
 import { authenticateAdmin } from "../middleware/auth";
-import { App, Publication } from "../types";
+import { AppContext, Publication } from "../types";
 import { getKeyFromR2Url, parseJsonFields } from "../utils";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-const publications = new Hono<App["_"]["env"]>();
+const publications = new Hono<AppContext>();
 
 const publicationSchema = z.object({
   title: z.string(),
@@ -22,6 +22,8 @@ const publicationSchema = z.object({
   image: z.string().url().optional().nullable(),
 });
 
+const jsonFields: (keyof Publication)[] = ["authors"];
+
 // GET publications by type
 publications.get("/type/:type", async (c) => {
   const type = c.req.param("type");
@@ -33,7 +35,8 @@ publications.get("/type/:type", async (c) => {
   )
     .bind(type)
     .all<Publication>();
-  const parsedResults = results.map((p) => parseJsonFields(p, ["authors"]));
+  if (!results) return c.json([]);
+  const parsedResults = results.map((p: Publication) => parseJsonFields(p, jsonFields));
   return c.json(parsedResults);
 });
 
@@ -42,7 +45,8 @@ publications.get("/", authenticateAdmin, async (c) => {
   const { results } = await c.env.DB.prepare(
     "SELECT * FROM publications ORDER BY number DESC"
   ).all<Publication>();
-  const parsedResults = results.map((p) => parseJsonFields(p, ["authors"]));
+  if (!results) return c.json([]);
+  const parsedResults = results.map((p: Publication) => parseJsonFields(p, jsonFields));
   return c.json(parsedResults);
 });
 
@@ -80,7 +84,7 @@ publications.put("/:id", authenticateAdmin, zValidator("json", publicationSchema
 
   const oldPub = await c.env.DB.prepare("SELECT image FROM publications WHERE id = ?")
     .bind(id)
-    .first<{ image: string }>();
+    .first<{ image: string | null }>();
   if (!oldPub) return c.json({ message: "Not Found" }, 404);
 
   await c.env.DB.prepare(
@@ -115,7 +119,7 @@ publications.delete("/:id", authenticateAdmin, async (c) => {
   const id = c.req.param("id");
   const pub = await c.env.DB.prepare("SELECT image FROM publications WHERE id = ?")
     .bind(id)
-    .first<{ image: string }>();
+    .first<{ image: string | null }>();
   if (!pub) return c.json({ message: "Not Found" }, 404);
 
   await c.env.DB.prepare("DELETE FROM publications WHERE id = ?").bind(id).run();

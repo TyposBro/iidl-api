@@ -1,12 +1,12 @@
 // src/routes/team.ts
 import { Hono } from "hono";
 import { authenticateAdmin } from "../middleware/auth";
-import { App, TeamMember } from "../types";
+import { AppContext, TeamMember } from "../types";
 import { getKeyFromR2Url } from "../utils";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-const team = new Hono<App["_"]["env"]>();
+const team = new Hono<AppContext>();
 
 const teamMemberSchema = z.object({
   name: z.string(),

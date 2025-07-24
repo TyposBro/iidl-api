@@ -1,9 +1,9 @@
 // src/routes/upload.ts
 import { Hono } from "hono";
-import { App } from "../types";
+import { AppContext } from "../types";
 import { authenticateAdmin } from "../middleware/auth";
 
-const upload = new Hono<App["_"]["env"]>();
+const upload = new Hono<AppContext>();
 
 const bufferToHex = (buffer: ArrayBuffer) =>
   [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, "0")).join("");

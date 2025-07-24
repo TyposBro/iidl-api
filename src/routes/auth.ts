@@ -1,30 +1,51 @@
-// src/middleware/auth.ts
-import { createMiddleware } from "hono/factory";
-import { verify } from "hono/jwt";
-import { AppContext } from "../types";
+// src/routes/auth.ts
+import { Hono } from "hono";
+import { sign } from "hono/jwt";
+import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
+import { AppContext, Admin } from "../types";
+import { verifyPassword } from "../utils";
 
-export const authenticateAdmin = createMiddleware<AppContext>(async (c, next) => {
-  const authHeader = c.req.header("Authorization");
+const auth = new Hono<AppContext>();
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return c.json({ message: "Authentication required" }, 401);
-  }
-
-  const token = authHeader.split(" ")[1];
-  const secret = c.env.JWT_SECRET;
-
-  if (!secret) {
-    throw new Error("JWT_SECRET is not set in environment");
-  }
-
-  try {
-    const decoded = await verify(token, secret);
-    if (!decoded.adminId) {
-      return c.json({ message: "Invalid token payload" }, 401);
-    }
-    c.set("adminId", decoded.adminId as string);
-    await next();
-  } catch (err) {
-    return c.json({ message: "Invalid token" }, 401);
-  }
+const loginSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
 });
+
+auth.post("/login", zValidator("json", loginSchema), async (c) => {
+  const { username, password } = c.req.valid("json");
+  const envUsername = c.env.ADMIN_USERNAME;
+
+  // Basic username check
+  if (username !== envUsername) {
+    return c.json({ message: "Invalid credentials" }, 401);
+  }
+
+  // Fetch user from DB
+  const admin = await c.env.DB.prepare("SELECT id, password_hash FROM admins WHERE username = ?")
+    .bind(username)
+    .first<Pick<Admin, "id" | "password_hash">>();
+
+  if (!admin || !admin.password_hash) {
+    return c.json({ message: "Invalid credentials" }, 401);
+  }
+
+  // Verify password hash
+  const isPasswordValid = await verifyPassword(password, admin.password_hash);
+  if (!isPasswordValid) {
+    return c.json({ message: "Invalid credentials" }, 401);
+  }
+
+  // Create JWT
+  const payload = {
+    adminId: admin.id.toString(),
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hour expiration
+  };
+
+  const token = await sign(payload, c.env.JWT_SECRET);
+
+  return c.json({ token });
+});
+
+export default auth;

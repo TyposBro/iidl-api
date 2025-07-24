@@ -1,12 +1,12 @@
 // src/routes/news.ts
 import { Hono } from "hono";
 import { authenticateAdmin } from "../middleware/auth";
-import { App, News } from "../types";
+import { AppContext, News } from "../types";
 import { getKeyFromR2Url, parseJsonFields } from "../utils";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-const news = new Hono<App["_"]["env"]>();
+const news = new Hono<AppContext>();
 
 const newsSchema = z.object({
   title: z.string(),
@@ -17,10 +17,13 @@ const newsSchema = z.object({
   type: z.string(),
 });
 
+const jsonFields: (keyof News)[] = ["images"];
+
 // GET all news
 news.get("/", async (c) => {
   const { results } = await c.env.DB.prepare("SELECT * FROM news ORDER BY number DESC").all<News>();
-  const parsedResults = results.map((n) => parseJsonFields(n, ["images"]));
+  if (!results) return c.json([]);
+  const parsedResults = results.map((n: News) => parseJsonFields(n, jsonFields));
   return c.json(parsedResults);
 });
 
@@ -49,7 +52,7 @@ news.put("/:id", authenticateAdmin, zValidator("json", newsSchema), async (c) =>
 
   const oldItem = await c.env.DB.prepare("SELECT images FROM news WHERE id = ?")
     .bind(id)
-    .first<{ images: string }>();
+    .first<{ images: string | null }>();
   if (!oldItem) return c.json({ message: "Not Found" }, 404);
 
   await c.env.DB.prepare(
@@ -83,7 +86,7 @@ news.delete("/:id", authenticateAdmin, async (c) => {
   const id = c.req.param("id");
   const item = await c.env.DB.prepare("SELECT images FROM news WHERE id = ?")
     .bind(id)
-    .first<{ images: string }>();
+    .first<{ images: string | null }>();
   if (!item) return c.json({ message: "Not Found" }, 404);
 
   await c.env.DB.prepare("DELETE FROM news WHERE id = ?").bind(id).run();

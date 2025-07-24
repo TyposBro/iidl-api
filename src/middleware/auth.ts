@@ -1,9 +1,9 @@
 // src/middleware/auth.ts
 import { createMiddleware } from "hono/factory";
 import { verify } from "hono/jwt";
-import { App } from "../types";
+import { AppContext } from "../types";
 
-export const authenticateAdmin = createMiddleware<App["Variables"]>(async (c, next) => {
+export const authenticateAdmin = createMiddleware<AppContext>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {

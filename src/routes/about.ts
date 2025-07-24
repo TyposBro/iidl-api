@@ -1,12 +1,12 @@
 // src/routes/about.ts
 import { Hono } from "hono";
 import { authenticateAdmin } from "../middleware/auth";
-import { App, AboutContent } from "../types";
+import { AppContext, AboutContent } from "../types";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { parseJsonFields } from "../utils";
 
-const about = new Hono<App["_"]["env"]>();
+const about = new Hono<AppContext>();
 
 const contentBlockSchema = z.object({
   title: z.string(),
@@ -19,10 +19,13 @@ const aboutContentSchema = z.object({
   content: z.array(contentBlockSchema),
 });
 
+const jsonFields: (keyof AboutContent)[] = ["content"];
+
 // GET all about content
 about.get("/", async (c) => {
   const { results } = await c.env.DB.prepare("SELECT * FROM about_content").all<AboutContent>();
-  const parsedResults = results.map((item) => parseJsonFields(item, ["content"]));
+  if (!results) return c.json([]);
+  const parsedResults = results.map((item: AboutContent) => parseJsonFields(item, jsonFields));
   return c.json(parsedResults);
 });
 

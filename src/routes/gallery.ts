@@ -1,12 +1,12 @@
 // src/routes/gallery.ts
 import { Hono } from "hono";
 import { authenticateAdmin } from "../middleware/auth";
-import { App, GalleryEvent } from "../types";
+import { AppContext, GalleryEvent } from "../types";
 import { getKeyFromR2Url, parseJsonFields } from "../utils";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-const gallery = new Hono<App["_"]["env"]>();
+const gallery = new Hono<AppContext>();
 
 const galleryEventSchema = z.object({
   title: z.string(),
@@ -17,12 +17,15 @@ const galleryEventSchema = z.object({
   type: z.string().optional().nullable(),
 });
 
+const jsonFields: (keyof GalleryEvent)[] = ["images"];
+
 // GET all gallery events
 gallery.get("/", async (c) => {
   const { results } = await c.env.DB.prepare(
     "SELECT * FROM gallery_events ORDER BY number DESC"
   ).all<GalleryEvent>();
-  const parsedResults = results.map((e) => parseJsonFields(e, ["images"]));
+  if (!results) return c.json([]);
+  const parsedResults = results.map((e: GalleryEvent) => parseJsonFields(e, jsonFields));
   return c.json(parsedResults);
 });
 
@@ -52,7 +55,7 @@ gallery.put("/:id", authenticateAdmin, zValidator("json", galleryEventSchema), a
 
   const oldEvent = await c.env.DB.prepare("SELECT images FROM gallery_events WHERE id = ?")
     .bind(id)
-    .first<{ images: string }>();
+    .first<{ images: string | null }>();
   if (!oldEvent) return c.json({ message: "Not Found" }, 404);
 
   await c.env.DB.prepare(
@@ -86,7 +89,7 @@ gallery.delete("/:id", authenticateAdmin, async (c) => {
   const id = c.req.param("id");
   const event = await c.env.DB.prepare("SELECT images FROM gallery_events WHERE id = ?")
     .bind(id)
-    .first<{ images: string }>();
+    .first<{ images: string | null }>();
   if (!event) return c.json({ message: "Not Found" }, 404);
 
   await c.env.DB.prepare("DELETE FROM gallery_events WHERE id = ?").bind(id).run();

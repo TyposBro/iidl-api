@@ -1,12 +1,12 @@
 // src/routes/meta.ts
 import { Hono } from "hono";
 import { authenticateAdmin } from "../middleware/auth";
-import { App, Meta } from "../types";
+import { AppContext, Meta } from "../types";
 import { parseJsonFields } from "../utils";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-const meta = new Hono<App["_"]["env"]>();
+const meta = new Hono<AppContext>();
 
 const metaSchema = z.object({
   pageIdentifier: z.string(),
@@ -45,7 +45,7 @@ meta.put(
     const data = c.req.valid("json");
     const now = new Date().toISOString();
 
-    const info = await c.env.DB.prepare(
+    await c.env.DB.prepare(
       `INSERT INTO meta (pageIdentifier, title, description, representativeImages, homeYoutubeId, footerAddress, footerAddressLink, footerPhone, footerEmail, footerHeadline, footerSubtext, createdAt, updatedAt) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(pageIdentifier) DO UPDATE SET
