@@ -15,6 +15,10 @@ const publicationSchema = new mongoose.Schema(
       type: String,
       required: [true, "Publication title is required"],
     },
+    number: {
+      type: Number,
+      required: [true, "Publication number is required"],
+    },
     authors: {
       type: [String], // Keep as array
       required: [true, "Authors are required"],

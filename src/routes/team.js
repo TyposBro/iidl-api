@@ -31,8 +31,9 @@ const extractFilenameFromUrl = (url) => {
 // GET All Team Members (Public)
 router.get("/", async (req, res) => {
   try {
-    const teamMembers = await TeamMember.find();
-    res.json(teamMembers);
+    const teamMembers = await TeamMember.find().sort({ number: 1 });
+    console.log("Fetched team members:", teamMembers); // Debugging log
+    res.json(teamMembers); // Sort by number field
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -44,6 +45,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
     const teamMember = new TeamMember({
       name: req.body.name,
       role: req.body.role,
+      number: req.body.number, // Expecting a number field in the body
       img: req.body.img, // Expecting image URL in the body
       type: req.body.type,
       bio: req.body.bio,
@@ -72,17 +74,19 @@ router.get("/:id", async (req, res) => {
 
 // PUT Update Team Member by ID (Admin Only)
 router.put("/:id", authenticateAdmin, async (req, res) => {
+  console.log("Updating team member with ID:", req); // Debugging log
   try {
     const teamMember = await TeamMember.findById(req.params.id);
     if (!teamMember) {
       return res.status(404).json({ message: "Cannot find team member" });
     }
 
-    if (req.body.name) teamMember.name = req.body.name;
-    if (req.body.role) teamMember.role = req.body.role;
-    if (req.body.type) teamMember.type = req.body.type;
-    if (req.body.bio) teamMember.bio = req.body.bio;
-    if (req.body.linkedIn) teamMember.linkedIn = req.body.linkedIn;
+    if (req.body.name !== undefined) teamMember.name = req.body.name;
+    if (req.body.number !== undefined) teamMember.number = req.body.number;
+    if (req.body.role !== undefined) teamMember.role = req.body.role;
+    if (req.body.type !== undefined) teamMember.type = req.body.type;
+    if (req.body.bio !== undefined) teamMember.bio = req.body.bio;
+    if (req.body.linkedIn !== undefined) teamMember.linkedIn = req.body.linkedIn;
 
     // Handle image update
     if (req.body.img && req.body.img !== teamMember.img) {

@@ -17,6 +17,12 @@ const metaSchema = new mongoose.Schema(
       // SEO Description, or Page Subtitle/Description
       type: String,
     },
+    // --- NEW FIELD ---
+    representativeImages: {
+      // Array of URLs for carousel images
+      type: [String],
+      default: [],
+    },
     // --- Home Page Specific Fields ---
     homeYoutubeId: {
       type: String, // For the YouTube video ID on the home page
@@ -43,11 +49,8 @@ const metaSchema = new mongoose.Schema(
       // e.g., "If you have any inquiries..."
       type: String,
     },
-    // Add other fields as needed for other pages
-    // For example, for publications page:
-    // publicationsPageSubtitle: String,
   },
-  { timestamps: true, strict: false } // strict: false allows adding fields later without schema migration
+  { timestamps: true, strict: false } // strict: false allows adding any field
 );
 
 const Meta = mongoose.model("Meta", metaSchema);

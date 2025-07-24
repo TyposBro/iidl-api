@@ -35,8 +35,8 @@ const extractFilenameFromUrl = (url) => {
 // GET All Publications (For Admin Panel)
 router.get("/", authenticateAdmin, async (req, res) => {
   try {
-    const publications = await Publication.find().sort({ type: 1, year: -1, createdAt: -1 });
-    res.json(publications);
+    const publications = await Publication.find().sort({ number: -1 });
+    res.json(publications); // Sort by number field
   } catch (err) {
     res.status(500).json({ message: "Error fetching publications: " + err.message });
   }
@@ -52,7 +52,7 @@ router.get("/type/:type", async (req, res) => {
   }
 
   try {
-    const publications = await Publication.find({ type: type }).sort({ year: -1, createdAt: -1 });
+    const publications = await Publication.find({ type: type }).sort({ number: 1 });
     res.json(publications);
   } catch (err) {
     res.status(500).json({ message: `Error fetching ${type} publications: ${err.message}` });
@@ -61,12 +61,21 @@ router.get("/type/:type", async (req, res) => {
 
 // POST Create New Publication (Admin Only)
 router.post("/", authenticateAdmin, async (req, res) => {
-  const { title, authors, venue, year, doi, link, abstract, type, location, image } = req.body;
+  const { title, authors, venue, year, doi, link, abstract, type, location, image, number } =
+    req.body;
 
-  if (!title || !authors || !Array.isArray(authors) || authors.length === 0 || !year || !type) {
+  if (
+    !title ||
+    !authors ||
+    !Array.isArray(authors) ||
+    authors.length === 0 ||
+    !year ||
+    !type ||
+    !number
+  ) {
     return res
       .status(400)
-      .json({ message: "Title, Authors (as array), Year, and Type are required." });
+      .json({ message: "Title, Authors (as array), Year, Type, and Number are required." });
   }
   if (!["journal", "conference"].includes(type)) {
     return res.status(400).json({ message: "Invalid publication type." });
@@ -74,6 +83,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
 
   const publication = new Publication({
     title,
+    number,
     authors,
     venue,
     year,
@@ -135,6 +145,9 @@ router.put("/:id", authenticateAdmin, async (req, res) => {
     // Validate required fields if they are being updated
     if (updates.hasOwnProperty("title") && updates.title === "") {
       return res.status(400).json({ message: "Title cannot be empty." });
+    }
+    if (updates.hasOwnProperty("number") && updates.number === "") {
+      return res.status(400).json({ message: "Number cannot be empty." });
     }
     if (
       updates.hasOwnProperty("authors") &&

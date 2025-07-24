@@ -10,19 +10,23 @@ const mongoose = require("mongoose");
 const teamSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Name is required"],
+  },
+  number: {
+    type: Number,
+    required: [true, "Number is required"],
   },
   role: {
     type: String,
-    required: true,
+    required: [true, "Role is required"],
   },
   img: {
     type: String,
-    required: true,
+    required: [true, "Image URL is required"],
   },
   type: {
     type: String,
-    required: true,
+    required: [true, "Type is required"],
     enum: ["current", "alumni"],
   },
   bio: {

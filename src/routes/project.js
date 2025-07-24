@@ -52,7 +52,7 @@ const extractFilenameFromUrl = (url) => {
 // Useful for admin panel to list all projects regardless of status
 router.get("/", async (req, res) => {
   try {
-    const projects = await Project.find().sort({ createdAt: "desc" }); // Or sort by year/status
+    const projects = await Project.find().sort({ number: -1 });
     res.json(projects);
   } catch (err) {
     res.status(500).json({ message: "Error fetching projects: " + err.message });
@@ -72,11 +72,11 @@ router.get("/status/:status", async (req, res) => {
     let query = Project.find({ status: status });
     // Define default sort order for each status if needed
     if (status === "current") {
-      query = query.sort({ createdAt: "desc" }); // Or a specific 'order' field
+      query = query.sort({ number: -1 }); // Or a specific 'order' field
     } else if (status === "completed" || status === "award") {
-      query = query.sort({ year: "desc", createdAt: "desc" });
+      query = query.sort({ number: -1 });
     } else {
-      query = query.sort({ createdAt: "desc" });
+      query = query.sort({ number: -1 });
     }
     const projects = await query.exec();
     res.json(projects);
@@ -90,6 +90,7 @@ router.get("/status/:status", async (req, res) => {
 router.post("/", authenticateAdmin, async (req, res) => {
   const {
     title,
+    number,
     subtitle,
     description,
     image, // URL from upload
@@ -116,6 +117,7 @@ router.post("/", authenticateAdmin, async (req, res) => {
 
   const project = new Project({
     title,
+    number,
     subtitle,
     description,
     image,

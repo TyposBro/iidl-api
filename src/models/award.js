@@ -8,6 +8,10 @@ const awardSchema = new mongoose.Schema({
   year: Number,
   img: String,
   authors: String,
+  number: {
+    type: Number,
+    required: [true, "Award number is required"],
+  },
 });
 
 const Award = mongoose.model("Award", awardSchema);
