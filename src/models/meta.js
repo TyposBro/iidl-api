@@ -27,6 +27,13 @@ const metaSchema = new mongoose.Schema(
     homeYoutubeId: {
       type: String, // For the YouTube video ID on the home page
     },
+    homeStaticImage: {
+      type: String, // URL for the static image on the home page (replaces carousel)
+    },
+    // --- About Page Specific Fields ---
+    aboutYoutubeId: {
+      type: String, // For the YouTube video ID on the about page
+    },
     // --- Footer Specific Fields ---
     footerAddress: {
       type: String,
