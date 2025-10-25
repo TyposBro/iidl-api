@@ -48,11 +48,23 @@ const extractFilenameFromUrl = (url) => {
 
 // --- API Endpoints for Projects ---
 
-// GET All Projects (Public - or could be admin only if needed)
-// Useful for admin panel to list all projects regardless of status
+// GET All Projects or Projects by Status (Public)
+// Supports optional ?status= query parameter for filtering
 router.get("/", async (req, res) => {
   try {
-    const projects = await Project.find().sort({ number: -1 });
+    const { status } = req.query;
+    
+    // Build filter object
+    const filter = {};
+    if (status) {
+      const validStatuses = ["current", "completed", "award"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status parameter." });
+      }
+      filter.status = status;
+    }
+    
+    const projects = await Project.find(filter).sort({ number: -1 });
     res.json(projects);
   } catch (err) {
     res.status(500).json({ message: "Error fetching projects: " + err.message });
